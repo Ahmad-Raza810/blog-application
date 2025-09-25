@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -27,6 +29,9 @@ public class User {
 
     @Column(nullable = false)
     private String name;
+
+    @OneToMany(orphanRemoval = true,cascade = CascadeType.ALL,mappedBy ="author")
+    private List<Post> posts=new ArrayList<>();
 
     private LocalDateTime createdAt;
 

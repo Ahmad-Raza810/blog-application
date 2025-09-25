@@ -32,6 +32,11 @@ public class Post {
     private Integer readTime;
 
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name ="author_id", nullable = false)
+    private User author;
+
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
