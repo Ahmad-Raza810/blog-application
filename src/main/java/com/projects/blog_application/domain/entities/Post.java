@@ -1,6 +1,7 @@
 package com.projects.blog_application.domain.entities;
 
 
+import com.projects.blog_application.domain.PostStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,6 +38,10 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="author_id", nullable = false)
     private User author;
+
+
+    @Enumerated(EnumType.STRING)
+    private PostStatus postStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id",nullable = false)
