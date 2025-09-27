@@ -4,6 +4,7 @@ package com.projects.blog_application.controllers;
 import com.projects.blog_application.domain.dtos.CategoryDTO;
 import com.projects.blog_application.domain.dtos.CategoryRequestDTO;
 import com.projects.blog_application.domain.entities.Category;
+import com.projects.blog_application.exception.ApiErrorResponse;
 import com.projects.blog_application.mapper.CategoryMapper;
 import com.projects.blog_application.service.CategoryService;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "api/v1/categories")
@@ -42,6 +44,13 @@ public class CategoryController {
         Category savedcategory=categoryService.createCategory(category);
         CategoryDTO categoryDTO=categoryMapper.toDto(savedcategory);
         return new ResponseEntity<>(categoryDTO, HttpStatus.CREATED);
+    }
+
+    //endpoint for deleting a category
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCategory(@PathVariable("id")UUID id){
+        categoryService.deleteCategory(id);
+        return new ResponseEntity<>("Category deleted successfully.", HttpStatus.CREATED);
     }
 
 
