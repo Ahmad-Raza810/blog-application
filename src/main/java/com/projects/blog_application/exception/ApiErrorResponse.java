@@ -6,7 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -16,13 +18,6 @@ public class ApiErrorResponse {
 
     private String message;
     private int status;
-    private List<FieldError> errors;
+    private Map<String,String> errors=new HashMap<>();
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FieldError{
-        private String message;
-        private String field;
-    }
 }

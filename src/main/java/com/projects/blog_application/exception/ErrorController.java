@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -33,12 +35,12 @@ public class ErrorController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse>  handlerValidation(MethodArgumentNotValidException exception){
 
-       List<ApiErrorResponse.FieldError> errors=exception.getBindingResult()
+        Map<String,String> errors=new HashMap<>();
+        exception.getBindingResult()
                 .getFieldErrors()
-                .stream()
-                .map(fieldError ->new ApiErrorResponse
-                                .FieldError(fieldError.getDefaultMessage(),
-                                fieldError.getField())).toList();
+                .forEach(error->errors.put(error.getField(),error.getDefaultMessage()));
+
+
 
         ApiErrorResponse errorResponse=ApiErrorResponse.builder()
                 .message("Validation error.")

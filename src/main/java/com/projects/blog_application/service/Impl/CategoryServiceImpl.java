@@ -28,7 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public Category createCategory(Category category) {
         if ( categoryRepository.existsByName(category.getName())) {
-           throw new ResourceNotFoundException("category with name " + category.getName() + "not exists.");
+           throw new ResourceNotFoundException("category with name " + category.getName() + "  already exists.");
         }
        return categoryRepository.save(category);
 
