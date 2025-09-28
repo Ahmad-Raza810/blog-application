@@ -2,6 +2,7 @@ package com.projects.blog_application.exception;
 
 
 import com.projects.blog_application.response.ApiErrorResponse;
+import com.projects.blog_application.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,16 +21,30 @@ import java.util.Map;
 public class ErrorController {
 
 
+
+
+
+    //handler for PostAvailableException
+    @ExceptionHandler(PostAvailableException.class)
+    public ResponseEntity<ApiErrorResponse> handlePostAvailable(PostAvailableException ex) {
+
+        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+                .message(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+    }
     //handler for resource not found exception
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse>  handlerResourceNotFound(ResourceNotFoundException exception){
         log.error("Exception caught {}", String.valueOf(exception));
         ApiErrorResponse errorResponse=ApiErrorResponse.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .status(HttpStatus.NO_CONTENT.value())
                 .message(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse,HttpStatus.NO_CONTENT);
     }
 
     //handler validation exception

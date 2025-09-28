@@ -1,6 +1,7 @@
 package com.projects.blog_application.service.Impl;
 
 import com.projects.blog_application.domain.entities.Category;
+import com.projects.blog_application.exception.PostAvailableException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.repositories.CategoryRepository;
 import com.projects.blog_application.service.CategoryService;
@@ -37,8 +38,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(UUID id) {
-        categoryRepository.findById(id)
+        Category category=categoryRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("category with id " + id + "not exists."));
+
+        if (category.getPosts()!=null && !category.getPosts().isEmpty()) {
+            throw  new PostAvailableException("category has posts do  it can't  be  deleted.");
+        }
         categoryRepository.deleteById(id);
+
+
     }
 }
