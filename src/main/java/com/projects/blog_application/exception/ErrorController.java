@@ -1,28 +1,29 @@
 package com.projects.blog_application.exception;
 
 
+import com.projects.blog_application.response.ApiErrorResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @ControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class ErrorController {
 
 
     //handler for resource not found exception
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse>  handlerResourceNotFound(ResourceNotFoundException exception){
+        log.error("Exception caught {}", String.valueOf(exception));
         ApiErrorResponse errorResponse=ApiErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .message(exception.getMessage())
@@ -34,7 +35,6 @@ public class ErrorController {
     //handler validation exception
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse>  handlerValidation(MethodArgumentNotValidException exception){
-
         Map<String,String> errors=new HashMap<>();
         exception.getBindingResult()
                 .getFieldErrors()
