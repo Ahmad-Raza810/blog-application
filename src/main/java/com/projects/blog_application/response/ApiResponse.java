@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Builder
 public class ApiResponse <T>{
     private String message;
