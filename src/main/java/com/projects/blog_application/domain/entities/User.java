@@ -2,6 +2,8 @@ package com.projects.blog_application.domain.entities;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,12 +24,15 @@ public class User {
     private UUID id;
 
     @Column(nullable = false,unique = true)
+    @Email(message = "Should be in valid email format.")
     private String email;
 
     @Column(nullable = false)
+    @Size(min = 4,message = "size should be in range of 4 to 8 character.")
     private String password;
 
     @Column(nullable = false)
+    @Size(min = 4,message = "size should be in range of 4 to 8 character.")
     private String name;
 
     @OneToMany(orphanRemoval = true,cascade = CascadeType.ALL,mappedBy ="author")
