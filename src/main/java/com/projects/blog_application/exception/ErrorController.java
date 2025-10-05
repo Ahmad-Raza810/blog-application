@@ -93,6 +93,18 @@ public class ErrorController {
     }
 
 
+    //handler for user already exists  exception
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse>  handlerResourceNotFound(UserAlreadyExistsException exception){
+        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(exception.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+    }
+
+
     //handler for any other exception
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse>  generalHandler(Exception exception){
