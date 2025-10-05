@@ -2,8 +2,6 @@ package com.projects.blog_application.config;
 
 
 import com.projects.blog_application.security.JwtFilter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +14,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -34,6 +38,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/v1/categories").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/posts").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/posts").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/v1/tags").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/tags").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/auth/**").permitAll()
 
                 .anyRequest().authenticated()
@@ -60,5 +66,18 @@ public class SecurityConfig {
             AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
+
+
+//    @Bean
+//    public CorsFilter  corsFilter() {
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowCredentials(true);
+//        config.addAllowedOrigin("http://localhost:5173");
+//        config.addAllowedHeader("*");
+//        config.addAllowedMethod("*"); // GET, POST, PUT, DELETE, OPTIONS
+//        source.registerCorsConfiguration("/**", config);
+//        return new CorsFilter(source);
+//    }
 
 }
