@@ -25,6 +25,13 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findAllWithPostCount();
     }
 
+
+    @Override
+    public Category getCategoryById(UUID id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+    }
+
     @Override
     @Transactional
     public Category createCategory(Category category) {
@@ -42,7 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(()-> new ResourceNotFoundException("category with id " + id + "not exists."));
 
         if (category.getPosts()!=null && !category.getPosts().isEmpty()) {
-            throw  new PostAvailableException("category has posts do  it can't  be  deleted.");
+            throw  new PostAvailableException("category has posts so  it can't  be  deleted.");
         }
         categoryRepository.deleteById(id);
 
