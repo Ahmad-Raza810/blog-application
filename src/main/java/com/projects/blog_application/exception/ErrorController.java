@@ -49,6 +49,18 @@ public class ErrorController {
         return new ResponseEntity<>(errorResponse,HttpStatus.NO_CONTENT);
     }
 
+    //handler for resource already exists exception
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse>  handlerResourceAlreadyExist(ResourceAlreadyExistsException exception){
+        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(exception.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+    }
+
+
 
     //handler validation exception
     @ExceptionHandler(MethodArgumentNotValidException.class)
