@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface TagRepository extends JpaRepository<Tag, UUID> {
 
+    //preventing n+1 problem
     @Query("SELECT t FROM Tag t LEFT JOIN FETCH t.posts")
     List<Tag> findAllWithPostCount();
 
