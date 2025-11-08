@@ -22,6 +22,8 @@ public class PostController {
     private final PostService postService;
     private final PostMapper postMapper;
 
+
+    //endpoint for get all posts
     @GetMapping
     public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getAllPosts(
             @RequestParam(required = false)UUID categoryId,
@@ -33,6 +35,25 @@ public class PostController {
         ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
                 "Posts fetched successfully.",
                 dtos,
+                HttpStatus.OK.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    //endpoint for getting drafts post(for only authenticated user)
+    @GetMapping(path = "/drafts")
+    public ResponseEntity<ApiResponse<List<PostResponseDTO>>>  getDrafts(@RequestAttribute("id") UUID id){
+        List<Post> drafts=postService.getDrafts(id);
+
+        List<PostResponseDTO> responseDTOS=drafts.stream()
+                .map(postMapper::toDto).toList();
+
+        ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
+                "drafts posts fetched successfully.",
+                responseDTOS,
                 HttpStatus.OK.value(),
                 true,
                 LocalDateTime.now()
