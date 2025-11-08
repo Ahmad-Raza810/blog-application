@@ -56,7 +56,7 @@ public class CategoryController {
         ApiResponse<CategoryDTO> response=new ApiResponse<>(
                 "category created  successfully. ",
                 categoryDTO,
-                HttpStatus.OK.value(),
+                HttpStatus.CREATED.value(),
                 true,
                 LocalDateTime.now()
         );
