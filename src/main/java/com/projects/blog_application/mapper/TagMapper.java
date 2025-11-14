@@ -23,12 +23,14 @@ public interface TagMapper {
 
 
     @Named("calculatePostCount")
-    default  long calculatePostCount(Set<Post> posts){
-        if (posts==null)
+    default int calculatePostCount(Set<Post> posts) {
+        if (posts == null || posts.isEmpty()) {
             return 0;
-        else
-            return  posts.stream()
-                    .filter(post-> PostStatus.PUBLISHED.equals(post.getPostStatus()))
-                    .count();
+        }
+        // Create a new list to avoid ConcurrentModificationException
+        return (int) posts.stream()
+                .filter(post -> post.getPostStatus() == PostStatus.PUBLISHED)
+                .count();
     }
+
 }

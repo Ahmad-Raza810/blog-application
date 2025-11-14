@@ -53,11 +53,7 @@ public class AuthServiceImpl implements AuthService {
         User user=userMapper.toEntity(registerRequestDTO);
         if(userRepository.existsByEmail(user.getEmail()))
             throw new UserAlreadyExistsException("user already exists with provided email.");
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-
-
         return userMapper.toDto(userRepository.save(user));
     }
 

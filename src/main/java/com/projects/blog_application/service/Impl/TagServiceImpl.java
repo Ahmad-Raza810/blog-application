@@ -1,11 +1,13 @@
 package com.projects.blog_application.service.Impl;
 
 
+import com.projects.blog_application.domain.dtos.TagProjection;
 import com.projects.blog_application.domain.entities.Tag;
 import com.projects.blog_application.exception.PostAvailableException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.repositories.TagRepository;
 import com.projects.blog_application.service.TagService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,9 @@ public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
 
     @Override
-    public List<Tag> getAllTags() {
-    return tagRepository.findAllWithPostCount();
+    public List<TagProjection> getAllTags() {
+        return tagRepository.findAllWithPostCount();
+
     }
 
 
@@ -29,7 +32,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public Tag getTagById(UUID id) {
         return tagRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tag not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Tag not found with id: " + id));
     }
 
 
@@ -83,6 +86,15 @@ public class TagServiceImpl implements TagService {
        }
        else
            throw new PostAvailableException("tag have related post so it can't be deleted.");
+    }
+
+    @Override
+    public List<Tag> getAllTagsByIds(Set<UUID> tagIds) {
+        List<Tag> foundTags=tagRepository.findAllById(tagIds);
+        if (foundTags.size()!=tagIds.size()) {
+            throw new EntityNotFoundException("not all entity found.");
+        }
+        return foundTags;
     }
 
 }

@@ -28,8 +28,15 @@ public class TagController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<TagResponseDTO>>> getAllTags() {
-        List<Tag> tags=tagService.getAllTags();
-        List<TagResponseDTO> dtos=tags.stream().map(mapper::toDto).toList();
+
+        List<TagResponseDTO> dtos=tagService.getAllTags().stream()
+                .map(projection -> new TagResponseDTO(
+                        projection.getId(),
+                        projection.getName(),
+                        projection.getPostCount().intValue()
+                ))
+                .toList();
+
         ApiResponse<List<TagResponseDTO>> response=new ApiResponse<>(
                 "tags fetched successfully.",
                 dtos,

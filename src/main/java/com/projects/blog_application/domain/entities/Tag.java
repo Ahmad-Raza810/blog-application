@@ -1,5 +1,6 @@
 package com.projects.blog_application.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,8 +26,8 @@ public class Tag {
     @Column(nullable = false,unique = true)
     private String name;
 
-
     @ManyToMany(mappedBy = "tags")
+    @JsonIgnore
     private Set<Post> posts=new HashSet<>();
 
 
