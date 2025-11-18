@@ -17,7 +17,7 @@ public class PostResponseDTO {
     private UUID id;
     private String title;
     private String content;
-    private Integer readTime;
+    private Integer readingTime;
     private AuthorDTO author;
     private PostStatus postStatus;
     private CategoryDTO category;
