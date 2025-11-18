@@ -13,5 +13,5 @@ import java.util.UUID;
 public class TagResponseDTO {
     private UUID id;
     private String name;
-    private int postCount;
+    private Long postCount;
 }
