@@ -1,18 +1,20 @@
 package com.projects.blog_application.service.Impl;
 
 import com.projects.blog_application.domain.PostStatus;
+import com.projects.blog_application.domain.dtos.CreatePostDTO;
 import com.projects.blog_application.domain.entities.Category;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.domain.entities.Tag;
+import com.projects.blog_application.domain.entities.User;
 import com.projects.blog_application.repositories.PostRepository;
 import com.projects.blog_application.service.CategoryService;
 import com.projects.blog_application.service.PostService;
 import com.projects.blog_application.service.TagService;
-import jakarta.transaction.Transactional;
+import com.projects.blog_application.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
+import org.springframework.transaction.annotation.Transactional;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +25,8 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CategoryService categoryService;
     private final TagService tagService;
+    private final UserService userService;
+    private final static int WORD_PER_MINUTE=200;
 
 
 
@@ -50,6 +54,12 @@ public class PostServiceImpl implements PostService {
         return postRepository.findAllByPostStatus(PostStatus.PUBLISHED);
     }
 
+    @Override
+    public List<Post> getDrafts(UUID userId) {
+        User loggedInUser=userService.getUserById(userId);
+        return postRepository.findAllByAuthorAndPostStatus(loggedInUser,PostStatus.DRAFT);
+    }
+
 //
 //    @Override
 //    public Post getPostById(UUID id) {
@@ -57,16 +67,34 @@ public class PostServiceImpl implements PostService {
 //                .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
 //    }
 //
-//    @Override
-//    public Post createPost(PostRequestDTO postRequestDTO) {
-//        Post post = Post.builder()
-//                .title(postRequestDTO.getTitle())
-//                .content(postRequestDTO.getContent())
-//                .tags(postRequestDTO.getTags()) // assuming tags are already fetched in DTO
-//                .build();
-//
-//        return postRepository.save(post);
-//    }
+
+    @Override
+    @Transactional
+    public Post createPost(CreatePostDTO createPostDTO,UUID userId) {
+
+        User loggedInUser=userService.getUserById(userId);
+        List<Tag> tags=tagService.getTagIds(createPostDTO.getTagIds());
+        Category category=categoryService.getCategoryById(createPostDTO.getCategoryId());
+
+        Post post = Post.builder()
+                .title(createPostDTO.getTitle())
+                .content(createPostDTO.getContent())
+                .tags(new HashSet<>(tags))
+                .category(category)
+                .postStatus(createPostDTO.getStatus())
+                .author(loggedInUser)
+                .readTime(calculateReadTime(createPostDTO.getContent()))
+                .build();
+
+        return postRepository.save(post);
+    }
+
+
+    private int calculateReadTime(String content){
+        int wordCount=content.trim().split("\\s").length;
+        return (int) Math.ceil((double)wordCount/WORD_PER_MINUTE);
+    }
+
 //
 //    @Override
 //    public Post updatePost(UUID id, PostRequestDTO postRequestDTO) {
