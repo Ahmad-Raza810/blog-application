@@ -2,6 +2,7 @@ package com.projects.blog_application.service.Impl;
 
 import com.projects.blog_application.domain.entities.Category;
 import com.projects.blog_application.exception.PostAvailableException;
+import com.projects.blog_application.exception.ResourceAlreadyExistsException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.repositories.CategoryRepository;
 import com.projects.blog_application.service.CategoryService;
@@ -36,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public Category createCategory(Category category) {
         if ( categoryRepository.existsByName(category.getName())) {
-           throw new ResourceNotFoundException("category with name " + category.getName() + "  already exists.");
+           throw new ResourceAlreadyExistsException("category with name '" + category.getName() + "'  already exists.");
         }
        return categoryRepository.save(category);
 
@@ -46,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategory(UUID id) {
         Category category=categoryRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("category with id " + id + "not exists."));
+                .orElseThrow(()-> new ResourceNotFoundException("category with id '" + id + "'  not exists."));
 
         if (category.getPosts()!=null && !category.getPosts().isEmpty()) {
             throw  new PostAvailableException("category has posts so  it can't  be  deleted.");
