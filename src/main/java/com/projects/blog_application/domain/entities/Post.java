@@ -34,7 +34,7 @@ public class Post {
 
 
     @Column(nullable = false)
-    private Integer readTime;
+    private Integer readingTime;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
