@@ -26,13 +26,13 @@ public class TagController {
     private  final TagMapper mapper;
 
 
+    //endpoint for get all tag.
     @GetMapping
     public ResponseEntity<ApiResponse<List<TagResponseDTO>>> getAllTags() {
-        List<Tag> tags=tagService.getAllTags();
-        List<TagResponseDTO> dtos=tags.stream().map(mapper::toDto).toList();
+        List<TagResponseDTO> tags=tagService.getAllTags();
         ApiResponse<List<TagResponseDTO>> response=new ApiResponse<>(
                 "tags fetched successfully.",
-                dtos,
+                tags,
                 HttpStatus.OK.value(),
                 true,
                 LocalDateTime.now()
