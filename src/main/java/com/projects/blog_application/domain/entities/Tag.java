@@ -1,10 +1,10 @@
 package com.projects.blog_application.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = "posts")
+@ToString(exclude = "posts")
 public class Tag {
 
     @Id
@@ -26,7 +28,9 @@ public class Tag {
     private String name;
 
 
-    @ManyToMany(mappedBy = "tags")
+    @JsonIgnore
+    @ManyToMany(mappedBy = "tags",fetch = FetchType.LAZY)
+
     private Set<Post> posts=new HashSet<>();
 
 
