@@ -1,13 +1,16 @@
 package com.projects.blog_application.controllers;
 
+import com.projects.blog_application.domain.dtos.CreatePostDTO;
 import com.projects.blog_application.domain.dtos.PostResponseDTO;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.mapper.PostMapper;
 import com.projects.blog_application.response.ApiResponse;
 import com.projects.blog_application.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -25,6 +28,7 @@ public class PostController {
 
     //endpoint for get all posts
     @GetMapping
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getAllPosts(
             @RequestParam(required = false)UUID categoryId,
             @RequestParam(required = false)UUID tagId) {
@@ -42,6 +46,7 @@ public class PostController {
 
         return ResponseEntity.ok(response);
     }
+
 
     //endpoint for getting drafts post(for only authenticated user)
     @GetMapping(path = "/drafts")
@@ -62,21 +67,25 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-//    @PostMapping
-//    public ResponseEntity<ApiResponse<PostResponseDTO>> createPost(@RequestBody @Valid PostRequestDTO requestDTO) {
-//        Post savedPost = postService.createPost(requestDTO);
-//        PostResponseDTO dto = postMapper.toDto(savedPost);
-//
-//        ApiResponse<PostResponseDTO> response = new ApiResponse<>(
-//                "Post created successfully.",
-//                dto,
-//                HttpStatus.CREATED.value(),
-//                true,
-//                LocalDateTime.now()
-//        );
-//
-//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
+    @PostMapping
+    public ResponseEntity<ApiResponse<PostResponseDTO>> createPost(
+            @RequestBody @Valid CreatePostDTO requestDTO,
+            @RequestAttribute("id") UUID userId
+    ) {
+        Post savedPost = postService.createPost(requestDTO,userId);
+        PostResponseDTO dto = postMapper.toDto(savedPost);
+
+        ApiResponse<PostResponseDTO> response = new ApiResponse<>(
+                "Post created successfully.",
+                dto,
+                HttpStatus.CREATED.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 //
 //    @GetMapping("/{id}")
 //    public ResponseEntity<ApiResponse<PostResponseDTO>> getPostById(@PathVariable UUID id) {
