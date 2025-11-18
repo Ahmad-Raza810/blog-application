@@ -1,6 +1,7 @@
 package com.projects.blog_application.service.Impl;
 
 
+import com.projects.blog_application.domain.dtos.TagResponseDTO;
 import com.projects.blog_application.domain.entities.Tag;
 import com.projects.blog_application.exception.PostAvailableException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
@@ -20,8 +21,8 @@ public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
 
     @Override
-    public List<Tag> getAllTags() {
-    return tagRepository.findAllWithPostCount();
+    public List<TagResponseDTO> getAllTags() {
+         return tagRepository.findAllTagWithPublishedPostCount();
     }
 
 
@@ -75,15 +76,24 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public void deleteTag(UUID id) {
-       Tag tag=tagRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Tag not exist with provided id"));
 
-       if (tag.getPosts().isEmpty()){
-           tagRepository.deleteById(id);
-       }
-       else
-           throw new PostAvailableException("tag have related post so it can't be deleted.");
+        Tag tag = tagRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tag not exist with provided id"));
+
+        long postCount = tagRepository.countPostsByTag(id);
+
+        if (postCount == 0) {
+            tagRepository.deleteById(id);
+        } else {
+            throw new PostAvailableException("tag have related post so it can't be deleted.");
+        }
     }
+
+    @Override
+    public List<Tag> getTagIds(Set<UUID> ids) {
+        return tagRepository.findAllById(ids);
+    }
+
 
 }
 
