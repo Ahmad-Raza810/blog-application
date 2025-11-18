@@ -21,7 +21,7 @@ public class PostResponseDTO {
     private AuthorDTO author;
     private PostStatus postStatus;
     private CategoryDTO category;
-    private Set<TagResponseDTO> tags;
+    private Set<TagDTO> tags;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
