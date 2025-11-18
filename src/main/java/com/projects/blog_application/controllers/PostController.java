@@ -2,6 +2,7 @@ package com.projects.blog_application.controllers;
 
 import com.projects.blog_application.domain.dtos.CreatePostDTO;
 import com.projects.blog_application.domain.dtos.PostResponseDTO;
+import com.projects.blog_application.domain.dtos.PostUpdateDTO;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.mapper.PostMapper;
 import com.projects.blog_application.response.ApiResponse;
@@ -86,54 +87,55 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<ApiResponse<PostResponseDTO>> getPostById(@PathVariable UUID id) {
-//        Post post = postService.getPostById(id);
-//        PostResponseDTO dto = postMapper.toDto(post);
-//
-//        ApiResponse<PostResponseDTO> response = new ApiResponse<>(
-//                "Post fetched successfully.",
-//                dto,
-//                HttpStatus.OK.value(),
-//                true,
-//                LocalDateTime.now()
-//        );
-//
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable UUID id) {
-//        postService.deletePost(id);
-//
-//        ApiResponse<Void> response = new ApiResponse<>(
-//                "Post deleted successfully.",
-//                null,
-//                HttpStatus.OK.value(),
-//                true,
-//                LocalDateTime.now()
-//        );
-//
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<ApiResponse<PostResponseDTO>> updatePost(
-//            @PathVariable UUID id,
-//            @RequestBody @Valid PostRequestDTO requestDTO) {
-//
-//        Post updatedPost = postService.updatePost(id, requestDTO);
-//        PostResponseDTO dto = postMapper.toDto(updatedPost);
-//
-//        ApiResponse<PostResponseDTO> response = new ApiResponse<>(
-//                "Post updated successfully.",
-//                dto,
-//                HttpStatus.OK.value(),
-//                true,
-//                LocalDateTime.now()
-//        );
-//
-//        return ResponseEntity.ok(response);
-//    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostResponseDTO>> getPostById(@PathVariable UUID id) {
+        Post post = postService.getPost(id);
+        PostResponseDTO dto = postMapper.toDto(post);
+
+        ApiResponse<PostResponseDTO> response = new ApiResponse<>(
+                "Post fetched successfully.",
+                dto,
+                HttpStatus.OK.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable UUID id) {
+        postService.deletePost(id);
+
+        ApiResponse<Void> response = new ApiResponse<>(
+                "Post deleted successfully.",
+                null,
+                HttpStatus.OK.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostResponseDTO>> updatePost(
+            @PathVariable UUID id,
+            @RequestBody @Valid PostUpdateDTO postUpdateDTO) {
+
+        Post updatedPost = postService.updatePost(id, postUpdateDTO);
+        PostResponseDTO dto = postMapper.toDto(updatedPost);
+
+        ApiResponse<PostResponseDTO> response = new ApiResponse<>(
+                "Post updated successfully.",
+                dto,
+                HttpStatus.OK.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }

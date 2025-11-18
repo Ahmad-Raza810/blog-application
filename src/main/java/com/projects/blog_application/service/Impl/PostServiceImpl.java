@@ -2,6 +2,7 @@ package com.projects.blog_application.service.Impl;
 
 import com.projects.blog_application.domain.PostStatus;
 import com.projects.blog_application.domain.dtos.CreatePostDTO;
+import com.projects.blog_application.domain.dtos.PostUpdateDTO;
 import com.projects.blog_application.domain.entities.Category;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.domain.entities.Tag;
@@ -11,12 +12,15 @@ import com.projects.blog_application.service.CategoryService;
 import com.projects.blog_application.service.PostService;
 import com.projects.blog_application.service.TagService;
 import com.projects.blog_application.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -83,7 +87,7 @@ public class PostServiceImpl implements PostService {
                 .category(category)
                 .postStatus(createPostDTO.getStatus())
                 .author(loggedInUser)
-                .readTime(calculateReadTime(createPostDTO.getContent()))
+                .readingTime(calculateReadTime(createPostDTO.getContent()))
                 .build();
 
         return postRepository.save(post);
@@ -95,29 +99,46 @@ public class PostServiceImpl implements PostService {
         return (int) Math.ceil((double)wordCount/WORD_PER_MINUTE);
     }
 
-//
-//    @Override
-//    public Post updatePost(UUID id, PostRequestDTO postRequestDTO) {
-//        Post existingPost = getPostById(id);
-//
-//        if (StringUtils.hasText(postRequestDTO.getTitle())) {
-//            existingPost.setTitle(postRequestDTO.getTitle());
-//        }
-//
-//        if (StringUtils.hasText(postRequestDTO.getContent())) {
-//            existingPost.setContent(postRequestDTO.getContent());
-//        }
-//
-//        if (postRequestDTO.getTags() != null) {
-//            existingPost.setTags(postRequestDTO.getTags());
-//        }
-//
-//        return postRepository.save(existingPost);
-//    }
-//
-//    @Override
-//    public void deletePost(UUID id) {
-//        Post post = getPostById(id);
-//        postRepository.delete(post);
-//    }
+
+    @Override
+    @Transactional
+    public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO) {
+        Post existingPost = postRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Post does not exist with id " + id));
+
+        existingPost.setTitle(postUpdateDTO.getTitle());
+        String postContent = postUpdateDTO.getContent();
+        existingPost.setContent(postContent);
+        existingPost.setPostStatus(postUpdateDTO.getStatus());
+        existingPost.setReadingTime(calculateReadTime(postContent));
+
+        UUID updatePostRequestCategoryId = postUpdateDTO.getCategoryId();
+        if(!existingPost.getCategory().getId().equals(updatePostRequestCategoryId)) {
+            Category newCategory = categoryService.getCategoryById(updatePostRequestCategoryId);
+            existingPost.setCategory(newCategory);
+        }
+
+        Set<UUID> existingTagIds = existingPost.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
+        Set<UUID> updatePostRequestTagIds = postUpdateDTO.getTagIds();
+        if(!existingTagIds.equals(updatePostRequestTagIds)) {
+            List<Tag> newTags = tagService.getTagIds(updatePostRequestTagIds);
+            existingPost.setTags(new HashSet<>(newTags));
+        }
+
+        return postRepository.save(existingPost);
+    }
+
+    @Override
+    public Post getPost(UUID id) {
+        return postRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Post does not exist with ID " + id));
+    }
+
+
+
+    @Override
+    public void deletePost(UUID id) {
+        Post post = getPost(id);
+        postRepository.delete(post);
+    }
 }

@@ -1,6 +1,8 @@
 package com.projects.blog_application.service;
 
+import com.projects.blog_application.domain.dtos.CreatePostDTO;
 import com.projects.blog_application.domain.dtos.PostRequestDTO;
+import com.projects.blog_application.domain.dtos.PostUpdateDTO;
 import com.projects.blog_application.domain.entities.Post;
 
 import java.util.List;
@@ -10,11 +12,13 @@ public interface PostService {
 
     List<Post> getAllPosts(UUID categoryId,UUID tagId);
 
-//    Post getPostById(UUID id);
-//
-//    Post createPost(PostRequestDTO postRequestDTO);
-//
-//    Post updatePost(UUID id, PostRequestDTO postRequestDTO);
-//
-//    void deletePost(UUID id);
+    List<Post> getDrafts(UUID id);
+
+    Post createPost(CreatePostDTO createPostDTO,UUID userId);
+
+    Post updatePost(UUID id, PostUpdateDTO postUpdateDTO);
+
+    Post getPost(UUID id);
+
+    void deletePost(UUID id);
 }
