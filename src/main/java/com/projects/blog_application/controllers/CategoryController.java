@@ -73,8 +73,8 @@ public class CategoryController {
 
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .message("Category deleted successfully.")
-                .data("Category no longer exists.")
-                .status(HttpStatus.NO_CONTENT.value())
+                .data(null)
+                .status(HttpStatus.OK.value())
                 .success(true)
                 .dateTime(LocalDateTime.now())
                 .build();
