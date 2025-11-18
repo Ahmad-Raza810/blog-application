@@ -42,11 +42,11 @@ public class ErrorController {
     public ResponseEntity<ApiErrorResponse>  handlerResourceNotFound(ResourceNotFoundException exception){
         log.error("Exception caught {}", String.valueOf(exception));
         ApiErrorResponse errorResponse=ApiErrorResponse.builder()
-                .status(HttpStatus.NO_CONTENT.value())
+                .status(HttpStatus.NOT_FOUND.value())
                 .message(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
     }
 
     //handler for resource already exists exception
