@@ -21,4 +21,6 @@ public interface PostService {
     Post getPost(UUID id);
 
     void deletePost(UUID id);
+
+    List<Post> getAllPostByUserId(UUID userid);
 }
