@@ -2,6 +2,7 @@ package com.projects.blog_application.exception;
 
 
 import com.projects.blog_application.response.ApiErrorResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -115,6 +116,19 @@ public class ErrorController {
 
         return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
     }
+
+
+    //jwt token expired exception
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredJwt(ExpiredJwtException exception) {
+        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message(exception.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse,HttpStatus.UNAUTHORIZED);
+    }
+
 
 
     //handler for any other exception
