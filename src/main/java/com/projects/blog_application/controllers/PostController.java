@@ -138,4 +138,23 @@ public class PostController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/user")
+    public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getAllPostByUserId(
+            @RequestAttribute("id") UUID userId
+            ) {
+
+        List<Post> allPosts = postService.getAllPostByUserId(userId);
+       List<PostResponseDTO> dtos=allPosts.stream().map(postMapper::toDto).toList();
+
+        ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
+                "Posts fetched successfully.",
+                dtos,
+                HttpStatus.OK.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }
