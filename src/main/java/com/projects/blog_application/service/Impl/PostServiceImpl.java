@@ -35,34 +35,34 @@ public class PostServiceImpl implements PostService {
 
 
     @Override
-    @Transactional
-    public List<Post> getAllPosts(UUID categoryId,UUID tagId) {
-
-        if (categoryId!=null && tagId!=null) {
-            Category category=categoryService.getCategoryById(categoryId);
-            Tag tag=tagService.getTagById(tagId);
-
-            return postRepository.findAllByPostStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED,category,tag);
+        @Transactional
+        public List<Post> getAllPosts(UUID categoryId,UUID tagId) {
+    
+            if (categoryId!=null && tagId!=null) {
+                Category category=categoryService.getCategoryById(categoryId);
+                Tag tag=tagService.getTagById(tagId);
+    
+                return postRepository.findAllByPostStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED,category,tag);
+            }
+    
+            if (categoryId!=null) {
+                Category category=categoryService.getCategoryById(categoryId);
+                return postRepository.findAllByPostStatusAndCategory(PostStatus.PUBLISHED,category);
+            }
+    
+            if (tagId!=null) {
+                Tag tag=tagService.getTagById(tagId);
+                return postRepository.findAllByPostStatusAndTagsContaining(PostStatus.PUBLISHED,tag);
+            }
+    
+            return postRepository.findAllByPostStatus(PostStatus.PUBLISHED);
         }
-
-        if (categoryId!=null) {
-            Category category=categoryService.getCategoryById(categoryId);
-            return postRepository.findAllByPostStatusAndCategory(PostStatus.PUBLISHED,category);
+    
+        @Override
+        public List<Post> getDrafts(UUID userId) {
+            User loggedInUser=userService.getUserById(userId);
+            return postRepository.findAllByAuthorAndPostStatus(loggedInUser,PostStatus.DRAFT);
         }
-
-        if (tagId!=null) {
-            Tag tag=tagService.getTagById(tagId);
-            return postRepository.findAllByPostStatusAndTagsContaining(PostStatus.PUBLISHED,tag);
-        }
-
-        return postRepository.findAllByPostStatus(PostStatus.PUBLISHED);
-    }
-
-    @Override
-    public List<Post> getDrafts(UUID userId) {
-        User loggedInUser=userService.getUserById(userId);
-        return postRepository.findAllByAuthorAndPostStatus(loggedInUser,PostStatus.DRAFT);
-    }
 
 //
 //    @Override
@@ -74,7 +74,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post createPost(CreatePostDTO createPostDTO,UUID userId) {
+    public Post createPost(CreatePostDTO createPostDTO,UUID userId)  {
 
         User loggedInUser=userService.getUserById(userId);
         List<Tag> tags=tagService.getTagIds(createPostDTO.getTagIds());
@@ -141,4 +141,11 @@ public class PostServiceImpl implements PostService {
         Post post = getPost(id);
         postRepository.delete(post);
     }
+
+    @Override
+    public List<Post> getAllPostByUserId(UUID userid) {
+        User author=userService.getUserById(userid);
+        return postRepository.findAllByAuthor(author);
+    }
+
 }
