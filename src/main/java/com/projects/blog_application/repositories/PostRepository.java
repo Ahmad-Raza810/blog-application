@@ -17,5 +17,6 @@
       List<Post> findAllByPostStatusAndTagsContaining(PostStatus postStatus, Tag tag);
       List<Post> findAllByPostStatus(PostStatus postStatus);
       List<Post> findAllByAuthorAndPostStatus(User user, PostStatus postStatus);
+      List<Post> findAllByAuthor(User user);
 
    }
