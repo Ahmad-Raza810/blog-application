@@ -17,16 +17,18 @@ public class PostRequestDTO {
 
 
     @NotBlank(message = "title is required.")
-    @Size(min = 10,max = 40,message = "length of title should be in between {min} and {max}")
-    @Pattern(regexp = "^[a-zA-Z0-9\\-\\s]+$",message = "Only letters, numbers, spaces and hyphens are allowed")
+    @Size(min = 10,max = 200,message = "length of title should be in between {min} and {max}")
+    @Pattern(regexp = "^[\\w\\s\\-\\p{So}]{3,100}$",
+            message = "Title must be 3-100 characters long and can include letters, numbers, spaces, hyphens, underscores, and emojis.")
     private String title;
 
 
     @NotBlank(message = "content is required.")
-    @Size(min = 20,max = 200,message = "length of title should be in between {min} and {max}")
-    @Pattern(regexp = "^[a-zA-Z0-9\\-\\s]+$",message = "Only letters, numbers, spaces and hyphens are allowed")
+    @Size(min = 20,max = 2000,message = "length of title should be in between {min} and {max}")
+    @Pattern(regexp = "^[\\s\\S\\p{So}]{20,5000}$",
+            message = "Content must be 20-5000 characters long and can include letters, numbers, spaces, punctuation, and emojis.")
     private String content;
 
     @NotNull(message = "read time is Required")
-    private Integer readTime;
+    private Integer readingTime;
 }

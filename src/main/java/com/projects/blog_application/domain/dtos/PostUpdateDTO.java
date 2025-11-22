@@ -3,6 +3,7 @@ package com.projects.blog_application.domain.dtos;
 import com.projects.blog_application.domain.PostStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,10 +26,11 @@ public class PostUpdateDTO {
 
     @NotBlank(message = "Title is required")
     @Size(min = 3, max = 200, message = "Title must be between {min} and {max} characters")
+    @Pattern(regexp = "^[\\w\\s\\-\\p{So}]{3,100}$",message = "Only letters, numbers, spaces and hyphens are allowed")
     private String title;
 
     @NotBlank(message = "Content is required")
-    @Size(min = 10, max = 50000, message = "Content must be between {min} and {max} characters")
+    @Size(min = 10, max = 2000, message = "Content must be between {min} and {max} characters")
     private String content;
 
     @NotNull(message = "Category ID is required")

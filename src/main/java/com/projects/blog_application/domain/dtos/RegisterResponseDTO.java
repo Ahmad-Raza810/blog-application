@@ -17,12 +17,4 @@ public class RegisterResponseDTO {
     private String email;
     private String name;
     private LocalDateTime createdAt;
-
-//    @OneToMany(orphanRemoval = true,cascade = CascadeType.ALL,mappedBy ="author")
-//    private List<Post> posts=new ArrayList<>();
-
-
-
-
-
 }
