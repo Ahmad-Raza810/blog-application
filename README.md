@@ -464,9 +464,84 @@
   java -jar target/blog-0.0.1-SNAPSHOT.jar
   ```
 
-  ## 🤝 Contributing
+  # Contributing to Blog Platform API
 
-  Contributions are welcome! Please feel free to submit issues and pull requests.
+Thank you for your interest in contributing! We welcome all contributions from the community.
 
 
-  **Happy Coding! 🎉**
+### Prerequisites
+
+- Java JDK 21+
+- Maven 3.6+ (or use Maven Wrapper)
+- Git
+
+### Setup
+
+1. **Fork and clone**:
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/blog-platform.git
+   cd blog-platform
+   ```
+
+2. **Add upstream**:
+   ```bash
+   git remote add upstream https://github.com/ORIGINAL-OWNER/blog-platform.git
+   ```
+
+3. **Install and run**:
+   ```bash
+   ./mvnw clean install
+   ./mvnw spring-boot:run
+   ```
+
+## 🔄 Development Workflow
+
+### Branch Naming
+
+- **Feature**: `feature/add-comment-system`
+- **Bug fix**: `fix/post-creation-validation`
+- **Docs**: `docs/update-api-examples`
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+### Making Changes
+
+1. Create a branch from `main`
+2. Make your changes with clear commits
+3. Push and create a pull request
+
+## 💻 Coding Standards
+
+### Java Style
+
+- **Meaningful names**: Self-documenting code
+- **Short methods**: Under 30 lines, single responsibility
+- **Java 21 features**: Use records, pattern matching, enhanced switch
+
+### Naming Conventions
+
+- Classes: `PascalCase` (e.g., `PostController`)
+- Methods: `camelCase` (e.g., `findPostById`)
+- Constants: `UPPER_SNAKE_CASE` (e.g., `MAX_PAGE_SIZE`)
+- Variables: `camelCase` (e.g., `postDto`)
+
+
+
+## 🐛 Reporting Issues
+
+**Found a bug?** Open an issue with:
+- Clear description
+- Steps to reproduce
+- Expected vs actual behavior
+- Environment details (OS, Java version)
+
+**Want a feature?** Open an issue describing:
+- The problem it solves
+- Proposed solution
+- Example usage
+
+---
+
+**Thank you for contributing! 🎉**
