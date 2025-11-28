@@ -7,6 +7,7 @@ import com.projects.blog_application.domain.entities.Category;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.domain.entities.Tag;
 import com.projects.blog_application.domain.entities.User;
+import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.repositories.PostRepository;
 import com.projects.blog_application.service.CategoryService;
 import com.projects.blog_application.service.PostService;
@@ -64,13 +65,7 @@ public class PostServiceImpl implements PostService {
             return postRepository.findAllByAuthorAndPostStatus(loggedInUser,PostStatus.DRAFT);
         }
 
-//
-//    @Override
-//    public Post getPostById(UUID id) {
-//        return postRepository.findById(id)
-//                .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
-//    }
-//
+
 
     @Override
     @Transactional
@@ -104,7 +99,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO) {
         Post existingPost = postRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Post does not exist with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post does not exist with id " + id));
 
         existingPost.setTitle(postUpdateDTO.getTitle());
         String postContent = postUpdateDTO.getContent();
@@ -131,7 +126,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Post getPost(UUID id) {
         return postRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Post does not exist with ID " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post does not exist with ID " + id));
     }
 
 
@@ -141,6 +136,7 @@ public class PostServiceImpl implements PostService {
         Post post = getPost(id);
         postRepository.delete(post);
     }
+
 
     @Override
     public List<Post> getAllPostByUserId(UUID userid) {
