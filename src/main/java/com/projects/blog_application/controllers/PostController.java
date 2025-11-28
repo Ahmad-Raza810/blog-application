@@ -51,7 +51,8 @@ public class PostController {
 
     //endpoint for getting drafts post(for only authenticated user)
     @GetMapping(path = "/drafts")
-    public ResponseEntity<ApiResponse<List<PostResponseDTO>>>  getDrafts(@RequestAttribute("id") UUID id){
+    public ResponseEntity<ApiResponse<List<PostResponseDTO>>>  getDrafts(@RequestAttribute(value = "id") UUID id){
+
         List<Post> drafts=postService.getDrafts(id);
 
         List<PostResponseDTO> responseDTOS=drafts.stream()
@@ -68,6 +69,8 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+
+    //endpoint for create post (for authenticated user only)
     @PostMapping
     public ResponseEntity<ApiResponse<PostResponseDTO>> createPost(
             @RequestBody @Valid CreatePostDTO requestDTO,
@@ -88,6 +91,9 @@ public class PostController {
     }
 
 
+
+
+    //endpoint for get post by id (public)
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PostResponseDTO>> getPostById(@PathVariable UUID id) {
         Post post = postService.getPost(id);
@@ -105,6 +111,7 @@ public class PostController {
     }
 
 
+    //endpoint for delete  post by id (for authenticated user only)
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable UUID id) {
         postService.deletePost(id);
@@ -120,6 +127,8 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+
+    //endpoint for update post by id (for authenticated user only)
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<PostResponseDTO>> updatePost(
             @PathVariable UUID id,
