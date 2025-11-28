@@ -4,8 +4,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -47,15 +45,9 @@ public class JwtFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities()
                 );
 
-
-
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                String name = jwtUtil.extractUsername(token);
-                CustomUserDetails userDetails2 = userDetailsService.loadUserByUsername(name);
-                UUID userId = userDetails2.getUser().getId(); // get UUID from DB
+                UUID userId = userDetails.getUser().getId();
                 request.setAttribute("id", userId);
-
-
 
             }
         }
