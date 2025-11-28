@@ -25,8 +25,9 @@ public class PostUpdateDTO {
     private UUID id;
 
     @NotBlank(message = "Title is required")
-    @Size(min = 3, max = 200, message = "Title must be between {min} and {max} characters")
-    @Pattern(regexp = "^[\\w\\s\\-\\p{So}]{3,100}$",message = "Only letters, numbers, spaces and hyphens are allowed")
+    @Size(min = 10, max = 200, message = "length of title should be in between {min} and {max}")
+    @Pattern(regexp = "^[\\w\\s\\-.\\p{So}]+$",
+            message = "Title can include letters, numbers, spaces, hyphens, underscores, full stops, and emojis.")
     private String title;
 
     @NotBlank(message = "Content is required")

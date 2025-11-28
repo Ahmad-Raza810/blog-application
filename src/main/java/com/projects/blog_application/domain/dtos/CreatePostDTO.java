@@ -22,8 +22,8 @@ public class CreatePostDTO {
 
     @NotBlank(message = "title is required.")
     @Size(min = 10, max = 200, message = "length of title should be in between {min} and {max}")
-    @Pattern(regexp = "^[\\w\\s\\-\\p{So}]{3,100}$",
-            message = "Title must be 3-100 characters long and can include letters, numbers, spaces, hyphens, underscores, and emojis.")
+    @Pattern(regexp = "^[\\w\\s\\-.\\p{So}]+$",
+            message = "Title can include letters, numbers, spaces, hyphens, underscores, full stops, and emojis.")
     private String title;
 
     @NotBlank(message = "content is required.")

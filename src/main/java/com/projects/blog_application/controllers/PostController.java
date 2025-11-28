@@ -129,12 +129,11 @@ public class PostController {
 
 
     //endpoint for update post by id (for authenticated user only)
-    @PutMapping("/{id}")
+    @PutMapping()
     public ResponseEntity<ApiResponse<PostResponseDTO>> updatePost(
-            @PathVariable UUID id,
             @RequestBody @Valid PostUpdateDTO postUpdateDTO) {
 
-        Post updatedPost = postService.updatePost(id, postUpdateDTO);
+        Post updatedPost = postService.updatePost(postUpdateDTO.getId(), postUpdateDTO);
         PostResponseDTO dto = postMapper.toDto(updatedPost);
 
         ApiResponse<PostResponseDTO> response = new ApiResponse<>(
