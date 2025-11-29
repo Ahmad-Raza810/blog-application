@@ -131,9 +131,10 @@ public class PostController {
     //endpoint for update post by id (for authenticated user only)
     @PutMapping()
     public ResponseEntity<ApiResponse<PostResponseDTO>> updatePost(
-            @RequestBody @Valid PostUpdateDTO postUpdateDTO) {
+            @RequestBody @Valid PostUpdateDTO postUpdateDTO,
+            @RequestAttribute("id") UUID userId) {
 
-        Post updatedPost = postService.updatePost(postUpdateDTO.getId(), postUpdateDTO);
+        Post updatedPost = postService.updatePost(postUpdateDTO.getId(), postUpdateDTO,userId);
         PostResponseDTO dto = postMapper.toDto(updatedPost);
 
         ApiResponse<PostResponseDTO> response = new ApiResponse<>(

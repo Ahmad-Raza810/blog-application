@@ -7,6 +7,7 @@ import com.projects.blog_application.domain.entities.Category;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.domain.entities.Tag;
 import com.projects.blog_application.domain.entities.User;
+import com.projects.blog_application.exception.NotAllowedToUpdatePostException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.repositories.PostRepository;
 import com.projects.blog_application.service.CategoryService;
@@ -97,9 +98,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO) {
+    public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO,UUID userId) {
+
         Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post does not exist with id " + id));
+
+        if(!existingPost.getAuthor().getId().equals(userId)){
+            throw new NotAllowedToUpdatePostException("you Are Not Allowed.");
+
+        }
 
         existingPost.setTitle(postUpdateDTO.getTitle());
         String postContent = postUpdateDTO.getContent();
