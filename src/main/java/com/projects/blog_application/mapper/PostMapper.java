@@ -12,7 +12,7 @@ import org.mapstruct.ReportingPolicy;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE ,uses = {CategoryMapper.class})
 public interface PostMapper {
 
 
