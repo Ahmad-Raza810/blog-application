@@ -28,9 +28,7 @@ public interface CategoryMapper {
         if (posts==null)
             return 0;
         else
-           return  posts.stream()
-                   .filter(post-> PostStatus.PUBLISHED.equals(post.getPostStatus()))
-                   .count();
+           return posts.size();
     }
 
 }
