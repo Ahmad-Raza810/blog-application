@@ -22,15 +22,15 @@ import java.util.UUID;
 public class TagController {
 
 
-    private final  TagService tagService;
-    private  final TagMapper mapper;
+    private final TagService tagService;
+    private final TagMapper mapper;
 
 
     //endpoint for get all tag.
     @GetMapping
     public ResponseEntity<ApiResponse<List<TagResponseDTO>>> getAllTags() {
-        List<TagResponseDTO> tags=tagService.getAllTags();
-        ApiResponse<List<TagResponseDTO>> response=new ApiResponse<>(
+        List<TagResponseDTO> tags = tagService.getAllTags();
+        ApiResponse<List<TagResponseDTO>> response = new ApiResponse<>(
                 "tags fetched successfully.",
                 tags,
                 HttpStatus.OK.value(),
@@ -38,24 +38,24 @@ public class TagController {
                 LocalDateTime.now()
         );
 
-        return  new ResponseEntity<>(response,HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
 
 
-
+    //api endpoint for create tags
     @PostMapping
-    public ResponseEntity<ApiResponse<List<TagResponseDTO>>> createTag(@RequestBody  @Valid TagRequestDTO requestDTO) {
-        List<Tag> savedTag=tagService.createTags(requestDTO.getNames());
+    public ResponseEntity<ApiResponse<List<TagResponseDTO>>> createTag(@RequestBody @Valid TagRequestDTO requestDTO) {
+        List<Tag> savedTag = tagService.createTags(requestDTO.getNames());
 
 
-        List<TagResponseDTO> tagResponseDTOS=savedTag.
+        List<TagResponseDTO> tagResponseDTOS = savedTag.
                 stream()
                 .map(mapper::toDto)
                 .toList();
 
 
-        ApiResponse<List<TagResponseDTO>> response=new ApiResponse<>(
+        ApiResponse<List<TagResponseDTO>> response = new ApiResponse<>(
                 "tags created successfully.",
                 tagResponseDTOS,
                 HttpStatus.CREATED.value(),
@@ -63,11 +63,11 @@ public class TagController {
                 LocalDateTime.now()
         );
 
-        return  new ResponseEntity<>(response,HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 
-
+    //api endpoint for delete a tag by id
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteTag(@PathVariable UUID id) {
         tagService.deleteTag(id);

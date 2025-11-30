@@ -23,18 +23,17 @@ import java.util.UUID;
 public class CategoryController {
 
     private final CategoryMapper categoryMapper;
-    private  final CategoryService categoryService;
-
+    private final CategoryService categoryService;
 
 
     //endpoint for getting all categories
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategory(){
-        List<CategoryDTO> categoryDTOList=categoryService.getAllCategory()
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategory() {
+        List<CategoryDTO> categoryDTOList = categoryService.getAllCategory()
                 .stream()
                 .map(categoryMapper::toDto).toList();
 
-        ApiResponse<List<CategoryDTO>> response=new ApiResponse<List<CategoryDTO>>(
+        ApiResponse<List<CategoryDTO>> response = new ApiResponse<List<CategoryDTO>>(
                 "Categories fetched successfully. ",
                 categoryDTOList,
                 HttpStatus.OK.value(),
@@ -48,12 +47,12 @@ public class CategoryController {
 
     //endpoint for creating a category
     @PostMapping
-    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@RequestBody @Valid CategoryRequestDTO requestDTO){
-        Category category=categoryMapper.toEntity(requestDTO);
-        Category savedcategory=categoryService.createCategory(category);
-        CategoryDTO categoryDTO=categoryMapper.toDto(savedcategory);
+    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@RequestBody @Valid CategoryRequestDTO requestDTO) {
+        Category category = categoryMapper.toEntity(requestDTO);
+        Category savedcategory = categoryService.createCategory(category);
+        CategoryDTO categoryDTO = categoryMapper.toDto(savedcategory);
 
-        ApiResponse<CategoryDTO> response=new ApiResponse<>(
+        ApiResponse<CategoryDTO> response = new ApiResponse<>(
                 "category created  successfully. ",
                 categoryDTO,
                 HttpStatus.CREATED.value(),
@@ -65,10 +64,9 @@ public class CategoryController {
     }
 
 
-
     //endpoint for deleting a category
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable("id")UUID id){
+    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable("id") UUID id) {
         categoryService.deleteCategory(id);
 
         ApiResponse<String> response = ApiResponse.<String>builder()

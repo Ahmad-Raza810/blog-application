@@ -12,12 +12,12 @@ import org.mapstruct.ReportingPolicy;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE ,uses = {CategoryMapper.class})
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {CategoryMapper.class})
 public interface PostMapper {
 
 
-    @Mapping(target = "author",source = "author")
-    @Mapping(target = "category",source = "category")
+    @Mapping(target = "author", source = "author")
+    @Mapping(target = "category", source = "category")
     @Mapping(target = "tags", qualifiedByName = "mapTags")
     PostResponseDTO toDto(Post post);
 

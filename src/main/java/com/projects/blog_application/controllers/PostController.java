@@ -31,10 +31,10 @@ public class PostController {
     @GetMapping
     @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getAllPosts(
-            @RequestParam(required = false)UUID categoryId,
-            @RequestParam(required = false)UUID tagId) {
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) UUID tagId) {
 
-        List<Post> posts = postService.getAllPosts(categoryId,tagId);
+        List<Post> posts = postService.getAllPosts(categoryId, tagId);
         List<PostResponseDTO> dtos = posts.stream().map(postMapper::toDto).toList();
 
         ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
@@ -51,11 +51,11 @@ public class PostController {
 
     //endpoint for getting drafts post(for only authenticated user)
     @GetMapping(path = "/drafts")
-    public ResponseEntity<ApiResponse<List<PostResponseDTO>>>  getDrafts(@RequestAttribute(value = "id") UUID id){
+    public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getDrafts(@RequestAttribute(value = "id") UUID id) {
 
-        List<Post> drafts=postService.getDrafts(id);
+        List<Post> drafts = postService.getDrafts(id);
 
-        List<PostResponseDTO> responseDTOS=drafts.stream()
+        List<PostResponseDTO> responseDTOS = drafts.stream()
                 .map(postMapper::toDto).toList();
 
         ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
@@ -76,7 +76,7 @@ public class PostController {
             @RequestBody @Valid CreatePostDTO requestDTO,
             @RequestAttribute("id") UUID userId
     ) {
-        Post savedPost = postService.createPost(requestDTO,userId);
+        Post savedPost = postService.createPost(requestDTO, userId);
         PostResponseDTO dto = postMapper.toDto(savedPost);
 
         ApiResponse<PostResponseDTO> response = new ApiResponse<>(
@@ -89,8 +89,6 @@ public class PostController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-
 
 
     //endpoint for get post by id (public)
@@ -134,7 +132,7 @@ public class PostController {
             @RequestBody @Valid PostUpdateDTO postUpdateDTO,
             @RequestAttribute("id") UUID userId) {
 
-        Post updatedPost = postService.updatePost(postUpdateDTO.getId(), postUpdateDTO,userId);
+        Post updatedPost = postService.updatePost(postUpdateDTO.getId(), postUpdateDTO, userId);
         PostResponseDTO dto = postMapper.toDto(updatedPost);
 
         ApiResponse<PostResponseDTO> response = new ApiResponse<>(
@@ -148,13 +146,14 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+    //api endpoint for get all post of a user
     @GetMapping("/user")
     public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getAllPostByUserId(
             @RequestAttribute("id") UUID userId
-            ) {
+    ) {
 
         List<Post> allPosts = postService.getAllPostByUserId(userId);
-       List<PostResponseDTO> dtos=allPosts.stream().map(postMapper::toDto).toList();
+        List<PostResponseDTO> dtos = allPosts.stream().map(postMapper::toDto).toList();
 
         ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
                 "Posts fetched successfully.",

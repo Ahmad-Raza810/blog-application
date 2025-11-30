@@ -27,12 +27,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
 
+    //service method for get category by id
     @Override
     public Category getCategoryById(UUID id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
     }
 
+    //service method for create category
     @Override
     @Transactional
     public Category createCategory(Category category) {
@@ -43,6 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     }
 
+    //service method for delete a category
     @Override
     @Transactional
     public void deleteCategory(UUID id) {

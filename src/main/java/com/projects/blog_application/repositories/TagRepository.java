@@ -17,26 +17,25 @@ public interface TagRepository extends JpaRepository<Tag, UUID> {
 
 
     @Query("""
-select new com.projects.blog_application.domain.dtos.TagResponseDTO(
-    t.id,
-    t.name,
-    count(p)
-)
-from Tag t
-left join t.posts p with p.postStatus = com.projects.blog_application.domain.PostStatus.PUBLISHED
-group by t.id, t.name
-""")
+            select new com.projects.blog_application.domain.dtos.TagResponseDTO(
+                t.id,
+                t.name,
+                count(p)
+            )
+            from Tag t
+            left join t.posts p with p.postStatus = com.projects.blog_application.domain.PostStatus.PUBLISHED
+            group by t.id, t.name
+            """)
     List<TagResponseDTO> findAllTagWithPublishedPostCount();
 
 
     @Query("""
-SELECT COUNT(p)
-FROM Post p
-JOIN p.tags t
-WHERE t.id = :tagId
-""")
+            SELECT COUNT(p)
+            FROM Post p
+            JOIN p.tags t
+            WHERE t.id = :tagId
+            """)
     long countPostsByTag(UUID tagId);
-
 
 
     List<Tag> findByNameInIgnoreCase(Set<String> names);

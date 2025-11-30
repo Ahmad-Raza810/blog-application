@@ -19,23 +19,20 @@ public class AuthController {
 
     private final AuthService authService;
 
+    //api endpoint for login user
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO requestDTO){
-       AuthResponseDTO responseDTO=authService.login(requestDTO);
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO requestDTO) {
+        AuthResponseDTO responseDTO = authService.login(requestDTO);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 
 
     }
 
-        @PostMapping("/register")
-        public ResponseEntity<RegisterResponseDTO> register(@RequestBody @Valid RegisterRequestDTO requestDTO){
-            RegisterResponseDTO responseDTO=authService.register(requestDTO);
-            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
-        }
-
-
-
-
-
+    //api endpoint for register a new user
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponseDTO> register(@RequestBody @Valid RegisterRequestDTO requestDTO) {
+        RegisterResponseDTO responseDTO = authService.register(requestDTO);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+    }
 
 }

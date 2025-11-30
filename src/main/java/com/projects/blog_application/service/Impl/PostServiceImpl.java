@@ -14,10 +14,10 @@ import com.projects.blog_application.service.CategoryService;
 import com.projects.blog_application.service.PostService;
 import com.projects.blog_application.service.TagService;
 import com.projects.blog_application.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,49 +32,50 @@ public class PostServiceImpl implements PostService {
     private final CategoryService categoryService;
     private final TagService tagService;
     private final UserService userService;
-    private final static int WORD_PER_MINUTE=200;
+    private final static int WORD_PER_MINUTE = 200;
 
 
-
-    @Override
-        @Transactional
-        public List<Post> getAllPosts(UUID categoryId,UUID tagId) {
-    
-            if (categoryId!=null && tagId!=null) {
-                Category category=categoryService.getCategoryById(categoryId);
-                Tag tag=tagService.getTagById(tagId);
-    
-                return postRepository.findAllByPostStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED,category,tag);
-            }
-    
-            if (categoryId!=null) {
-                Category category=categoryService.getCategoryById(categoryId);
-                return postRepository.findAllByPostStatusAndCategory(PostStatus.PUBLISHED,category);
-            }
-    
-            if (tagId!=null) {
-                Tag tag=tagService.getTagById(tagId);
-                return postRepository.findAllByPostStatusAndTagsContaining(PostStatus.PUBLISHED,tag);
-            }
-    
-            return postRepository.findAllByPostStatus(PostStatus.PUBLISHED);
-        }
-    
-        @Override
-        public List<Post> getDrafts(UUID userId) {
-            User loggedInUser=userService.getUserById(userId);
-            return postRepository.findAllByAuthorAndPostStatus(loggedInUser,PostStatus.DRAFT);
-        }
-
-
-
+    //service method for get all post
     @Override
     @Transactional
-    public Post createPost(CreatePostDTO createPostDTO,UUID userId)  {
+    public List<Post> getAllPosts(UUID categoryId, UUID tagId) {
 
-        User loggedInUser=userService.getUserById(userId);
-        List<Tag> tags=tagService.getTagIds(createPostDTO.getTagIds());
-        Category category=categoryService.getCategoryById(createPostDTO.getCategoryId());
+        if (categoryId != null && tagId != null) {
+            Category category = categoryService.getCategoryById(categoryId);
+            Tag tag = tagService.getTagById(tagId);
+
+            return postRepository.findAllByPostStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag);
+        }
+
+        if (categoryId != null) {
+            Category category = categoryService.getCategoryById(categoryId);
+            return postRepository.findAllByPostStatusAndCategory(PostStatus.PUBLISHED, category);
+        }
+
+        if (tagId != null) {
+            Tag tag = tagService.getTagById(tagId);
+            return postRepository.findAllByPostStatusAndTagsContaining(PostStatus.PUBLISHED, tag);
+        }
+
+        return postRepository.findAllByPostStatus(PostStatus.PUBLISHED);
+    }
+
+    //service method for get drafts post only
+    @Override
+    public List<Post> getDrafts(UUID userId) {
+        User loggedInUser = userService.getUserById(userId);
+        return postRepository.findAllByAuthorAndPostStatus(loggedInUser, PostStatus.DRAFT);
+    }
+
+
+    //service method for create a post
+    @Override
+    @Transactional
+    public Post createPost(CreatePostDTO createPostDTO, UUID userId) {
+
+        User loggedInUser = userService.getUserById(userId);
+        List<Tag> tags = tagService.getTagIds(createPostDTO.getTagIds());
+        Category category = categoryService.getCategoryById(createPostDTO.getCategoryId());
 
         Post post = Post.builder()
                 .title(createPostDTO.getTitle())
@@ -90,20 +91,22 @@ public class PostServiceImpl implements PostService {
     }
 
 
-    private int calculateReadTime(String content){
-        int wordCount=content.trim().split("\\s").length;
-        return (int) Math.ceil((double)wordCount/WORD_PER_MINUTE);
+    //a utility method which calculate read time
+    private int calculateReadTime(String content) {
+        int wordCount = content.trim().split("\\s").length;
+        return (int) Math.ceil((double) wordCount / WORD_PER_MINUTE);
     }
 
 
+    //service method for update a post
     @Override
     @Transactional
-    public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO,UUID userId) {
+    public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO, UUID userId) {
 
         Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post does not exist with id " + id));
 
-        if(!existingPost.getAuthor().getId().equals(userId)){
+        if (!existingPost.getAuthor().getId().equals(userId)) {
             throw new NotAllowedToUpdatePostException("you Are Not Allowed.");
 
         }
@@ -115,14 +118,14 @@ public class PostServiceImpl implements PostService {
         existingPost.setReadingTime(calculateReadTime(postContent));
 
         UUID updatePostRequestCategoryId = postUpdateDTO.getCategoryId();
-        if(!existingPost.getCategory().getId().equals(updatePostRequestCategoryId)) {
+        if (!existingPost.getCategory().getId().equals(updatePostRequestCategoryId)) {
             Category newCategory = categoryService.getCategoryById(updatePostRequestCategoryId);
             existingPost.setCategory(newCategory);
         }
 
         Set<UUID> existingTagIds = existingPost.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
         Set<UUID> updatePostRequestTagIds = postUpdateDTO.getTagIds();
-        if(!existingTagIds.equals(updatePostRequestTagIds)) {
+        if (!existingTagIds.equals(updatePostRequestTagIds)) {
             List<Tag> newTags = tagService.getTagIds(updatePostRequestTagIds);
             existingPost.setTags(new HashSet<>(newTags));
         }
@@ -130,6 +133,7 @@ public class PostServiceImpl implements PostService {
         return postRepository.save(existingPost);
     }
 
+    //service method for get post by id
     @Override
     public Post getPost(UUID id) {
         return postRepository.findById(id)
@@ -137,7 +141,7 @@ public class PostServiceImpl implements PostService {
     }
 
 
-
+    //service method for delete a post
     @Override
     public void deletePost(UUID id) {
         Post post = getPost(id);
@@ -145,9 +149,10 @@ public class PostServiceImpl implements PostService {
     }
 
 
+    //service method for get all post of a user
     @Override
     public List<Post> getAllPostByUserId(UUID userid) {
-        User author=userService.getUserById(userid);
+        User author = userService.getUserById(userid);
         return postRepository.findAllByAuthor(author);
     }
 

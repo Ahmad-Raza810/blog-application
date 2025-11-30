@@ -13,10 +13,10 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring" ,unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CategoryMapper {
 
-    @Mapping(target = "postCount",source = "posts",qualifiedByName ="calculatePostCount")
+    @Mapping(target = "postCount", source = "posts", qualifiedByName = "calculatePostCount")
     CategoryDTO toDto(Category category);
 
 
@@ -24,11 +24,11 @@ public interface CategoryMapper {
 
 
     @Named("calculatePostCount")
-    default  long calculatePostCount(List<Post> posts){
-        if (posts==null)
+    default long calculatePostCount(List<Post> posts) {
+        if (posts == null)
             return 0;
         else
-           return posts.size();
+            return posts.size();
     }
 
 }

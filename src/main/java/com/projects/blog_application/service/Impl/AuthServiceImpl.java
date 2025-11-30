@@ -30,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
 
+    //service method for login a user
     @Override
     public AuthResponseDTO login(LoginRequestDTO requestDTO) {
         Authentication authentication=authenticationManager.authenticate(
@@ -37,7 +38,6 @@ public class AuthServiceImpl implements AuthService {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         String token=jwtUtil.generateToken(requestDTO.getEmail());
         return new AuthResponseDTO(
                 token,
@@ -48,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    //service method for register new user
     @Override
     public RegisterResponseDTO register(RegisterRequestDTO registerRequestDTO) {
         User user=userMapper.toEntity(registerRequestDTO);
@@ -55,9 +56,6 @@ public class AuthServiceImpl implements AuthService {
             throw new UserAlreadyExistsException("user already exists with provided email.");
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-
-
         return userMapper.toDto(userRepository.save(user));
     }
 

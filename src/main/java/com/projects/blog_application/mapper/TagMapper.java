@@ -13,22 +13,22 @@ import org.mapstruct.ReportingPolicy;
 import java.util.List;
 import java.util.Set;
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TagMapper {
 
-    @Mapping(target = "postCount",source ="posts",qualifiedByName ="calculatePostCount")
+    @Mapping(target = "postCount", source = "posts", qualifiedByName = "calculatePostCount")
     TagResponseDTO toDto(Tag tag);
 
     Tag toEntity(TagRequestDTO requestDTO);
 
 
     @Named("calculatePostCount")
-    default  long calculatePostCount(Set<Post> posts){
-        if (posts==null)
+    default long calculatePostCount(Set<Post> posts) {
+        if (posts == null)
             return 0;
         else
-            return  posts.stream()
-                    .filter(post-> PostStatus.PUBLISHED.equals(post.getPostStatus()))
+            return posts.stream()
+                    .filter(post -> PostStatus.PUBLISHED.equals(post.getPostStatus()))
                     .count();
     }
 }

@@ -20,13 +20,14 @@ public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
 
+    //service method get all tags
     @Override
     public List<TagResponseDTO> getAllTags() {
-         return tagRepository.findAllTagWithPublishedPostCount();
+        return tagRepository.findAllTagWithPublishedPostCount();
     }
 
 
-
+    //service method for get tag by id
     @Override
     public Tag getTagById(UUID id) {
         return tagRepository.findById(id)
@@ -34,6 +35,7 @@ public class TagServiceImpl implements TagService {
     }
 
 
+    //service method for create tags
     @Override
     @Transactional
     public List<Tag> createTags(Set<String> names) {
@@ -73,6 +75,7 @@ public class TagServiceImpl implements TagService {
     }
 
 
+    //service method for delete tag by id
     @Override
     @Transactional
     public void deleteTag(UUID id) {
@@ -89,6 +92,7 @@ public class TagServiceImpl implements TagService {
         }
     }
 
+    //service method for get tags by ids
     @Override
     public List<Tag> getTagIds(Set<UUID> ids) {
         return tagRepository.findAllById(ids);

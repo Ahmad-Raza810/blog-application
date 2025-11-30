@@ -32,7 +32,7 @@ public class JwtUtil {
 
 
     //method for checking token is expired or not
-    public boolean isTokenExpired(String token){
+    public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
 
     }
@@ -50,7 +50,7 @@ public class JwtUtil {
 
 
     //method for validate token
-    public boolean validateToken(String token, UserDetails userDetails){
+    public boolean validateToken(String token, UserDetails userDetails) {
         return (userDetails.getUsername().equals(extractUsername(token)) && !isTokenExpired(token));
 
     }
@@ -79,7 +79,6 @@ public class JwtUtil {
         }
         return null;
     }
-
 
 
 }

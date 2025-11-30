@@ -7,7 +7,10 @@ import java.util.UUID;
 
 public interface CategoryService {
     List<Category> getAllCategory();
+
     Category getCategoryById(UUID id);
+
     Category createCategory(Category category);
+
     void deleteCategory(UUID id);
 }

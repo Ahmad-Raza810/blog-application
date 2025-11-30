@@ -17,7 +17,7 @@ public class UserServiceImpl implements  UserService{
         this.userRepository = userRepository;
     }
 
-
+    //service method for get user by id
     @Override
     public User getUserById(UUID id) {
        return userRepository.findById(id)

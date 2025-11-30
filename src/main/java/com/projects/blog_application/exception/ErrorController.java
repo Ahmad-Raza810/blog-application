@@ -23,74 +23,69 @@ import java.util.Map;
 public class ErrorController {
 
 
-
-
-
     //handler for PostAvailableException
     @ExceptionHandler(PostAvailableException.class)
     public ResponseEntity<ApiErrorResponse> handlePostAvailable(PostAvailableException ex) {
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .message(ex.getMessage())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
 
     //handler for resource not found exception
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse>  handlerResourceNotFound(ResourceNotFoundException exception){
+    public ResponseEntity<ApiErrorResponse> handlerResourceNotFound(ResourceNotFoundException exception) {
         log.error("Exception caught {}", String.valueOf(exception));
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())
                 .message(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     //handler for resource already exists exception
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorResponse>  handlerResourceAlreadyExist(ResourceAlreadyExistsException exception){
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+    public ResponseEntity<ApiErrorResponse> handlerResourceAlreadyExist(ResourceAlreadyExistsException exception) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .message(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
-
 
 
     //handler validation exception
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse>  handlerValidation(MethodArgumentNotValidException exception){
-        Map<String,String> errors=new HashMap<>();
+    public ResponseEntity<ApiErrorResponse> handlerValidation(MethodArgumentNotValidException exception) {
+        Map<String, String> errors = new HashMap<>();
         exception.getBindingResult()
                 .getFieldErrors()
-                .forEach(error->errors.put(error.getField(),error.getDefaultMessage()));
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .message("Validation error.")
                 .errors(errors)
                 .status(HttpStatus.BAD_REQUEST.value())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
-
 
 
     // Handle BadCredentialsException
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiErrorResponse> handleBadCredentials(
             BadCredentialsException ex) {
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .message("Invalid email or password.")
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
 
@@ -108,31 +103,31 @@ public class ErrorController {
 
     //handler for user already exists  exception
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorResponse>  handlerResourceNotFound(UserAlreadyExistsException exception){
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+    public ResponseEntity<ApiErrorResponse> handlerResourceNotFound(UserAlreadyExistsException exception) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .message(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
 
     //jwt token expired exception
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ApiErrorResponse> handleExpiredJwt(ExpiredJwtException exception) {
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .message(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(NotAllowedToUpdatePostException.class)
     public ResponseEntity<ApiErrorResponse> handleNotAllowedToUpdatePost(NotAllowedToUpdatePostException exception) {
 
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .status(HttpStatus.FORBIDDEN.value())
                 .message(exception.getMessage())
                 .build();
@@ -141,15 +136,14 @@ public class ErrorController {
     }
 
 
-
     //handler for any other exception
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse>  generalHandler(Exception exception){
-        ApiErrorResponse errorResponse=ApiErrorResponse.builder()
+    public ResponseEntity<ApiErrorResponse> generalHandler(Exception exception) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .message("Something went wrong.")
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

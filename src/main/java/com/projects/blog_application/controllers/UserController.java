@@ -26,19 +26,20 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
 
-    public UserController(UserService userService,UserMapper userMapper) {
+    public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
-        this.userMapper=userMapper;
+        this.userMapper = userMapper;
     }
 
 
+    //api endpoint for get user profile
     @GetMapping
-    public ResponseEntity<ApiResponse<RegisterResponseDTO>> getProfile(@RequestAttribute("id")UUID userId){
-        User user=userService.getUserById(userId);
+    public ResponseEntity<ApiResponse<RegisterResponseDTO>> getProfile(@RequestAttribute("id") UUID userId) {
+        User user = userService.getUserById(userId);
 
-        RegisterResponseDTO profile=userMapper.toDto(user);
+        RegisterResponseDTO profile = userMapper.toDto(user);
 
-        ApiResponse<RegisterResponseDTO> response=new ApiResponse<>(
+        ApiResponse<RegisterResponseDTO> response = new ApiResponse<>(
                 "profile fetched successfully.",
                 profile,
                 HttpStatus.OK.value(),
@@ -46,8 +47,7 @@ public class UserController {
                 LocalDateTime.now()
         );
 
-        return  new ResponseEntity<>(response,HttpStatus.OK);
-
+        return new ResponseEntity<>(response, HttpStatus.OK);
 
 
     }
