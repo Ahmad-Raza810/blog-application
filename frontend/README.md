@@ -1,50 +1,105 @@
-# React + TypeScript + Vite
+# Blog Platform Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, high-performance blog application interface built with React, TypeScript, and Vite. This project features a polished UI with smooth animations, a rich text editor, and a responsive design powered by Tailwind CSS and NextUI.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Modern UI/UX**: Built with NextUI and Tailwind CSS for a premium look and feel.
+- **Rich Text Editing**: Integrated Tiptap editor for creating and editing blog posts.
+- **Smooth Animations**: Enhanced user experience with Framer Motion transitions.
+- **Responsive Design**: Fully responsive layout for mobile, tablet, and desktop.
+- **Type Safety**: Comprehensive TypeScript support for robust development.
+- **Routing**: Client-side routing with React Router DOM.
+- **State Management**: Efficient data handling with Axios and React Hooks.
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Core**: [React 18](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/), [NextUI](https://nextui.org/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Editor**: [Tiptap](https://tiptap.dev/)
+- **Routing**: [React Router v7](https://reactrouter.com/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
+- **Sanitization**: [DOMPurify](https://github.com/cure53/DOMPurify)
 
-- Configure the top-level `parserOptions` property like this:
+## 📋 Prerequisites
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Node.js**: v20 or higher
+- **npm**: v10 or higher (bundled with Node.js)
+
+## 📦 Installation & Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd blog-frontend
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### 2. Install Dependencies
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+npm install
 ```
+
+### 3. Configure Environment
+
+Create a `.env` file in the root directory if needed (e.g., for API base URL):
+
+```env
+VITE_API_BASE_URL=http://localhost:8080/api/v1
+```
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5173`.
+
+## 📜 Available Scripts
+
+| Script | Description |
+| :--- | :--- |
+| `npm run dev` | Starts the development server with HMR |
+| `npm run build` | Compiles TypeScript and builds the app for production |
+| `npm run preview` | Locally previews the production build |
+| `npm run lint` | Runs ESLint to check for code quality issues |
+| `npm run clean` | Cleans build artifacts and node_modules |
+
+## 🏗️ Project Structure
+
+```
+src/
+├── assets/          # Static assets (images, fonts)
+├── components/      # Reusable UI components
+├── layouts/         # Page layouts (Main, Auth, etc.)
+├── pages/           # Application pages (Home, Post, Login)
+├── services/        # API service calls (Axios setup)
+├── types/           # TypeScript type definitions
+├── utils/           # Helper functions
+├── App.tsx          # Main application component
+└── main.tsx         # Entry point
+```
+
+## 🎨 Design System
+
+This project uses a customized design system built on top of Tailwind CSS and NextUI.
+- **Colors**: Defined in `tailwind.config.js`
+- **Typography**: Uses modern sans-serif fonts
+- **Components**: Modular and reusable components in `src/components`
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License.
