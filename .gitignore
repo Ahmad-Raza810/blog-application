@@ -1,6 +1,5 @@
 .idea
 .mvn
 src/test
-src/main/resources/application.properties
 
 target
