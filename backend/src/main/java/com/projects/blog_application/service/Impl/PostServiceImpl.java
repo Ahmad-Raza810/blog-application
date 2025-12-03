@@ -7,7 +7,7 @@ import com.projects.blog_application.domain.entities.Category;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.domain.entities.Tag;
 import com.projects.blog_application.domain.entities.User;
-import com.projects.blog_application.exception.NotAllowedToUpdatePostException;
+import com.projects.blog_application.exception.NotAllowedOperationException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.repositories.PostRepository;
 import com.projects.blog_application.service.CategoryService;
@@ -107,7 +107,7 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post does not exist with id " + id));
 
         if (!existingPost.getAuthor().getId().equals(userId)) {
-            throw new NotAllowedToUpdatePostException("you Are Not Allowed.");
+            throw new NotAllowedOperationException("You do not have permission to update this post.");
 
         }
 
@@ -143,8 +143,12 @@ public class PostServiceImpl implements PostService {
 
     //service method for delete a post
     @Override
-    public void deletePost(UUID id) {
-        Post post = getPost(id);
+    public void deletePost(UUID postId,UUID userId) {
+
+        if (!getPost(postId).getAuthor().getId().equals(userId)) {
+            throw new NotAllowedOperationException("You do not have permission to delete this post.");
+        }
+        Post post = getPost(postId);
         postRepository.delete(post);
     }
 

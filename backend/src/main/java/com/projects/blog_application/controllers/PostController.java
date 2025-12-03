@@ -111,8 +111,8 @@ public class PostController {
 
     //endpoint for delete  post by id (for authenticated user only)
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable UUID id) {
-        postService.deletePost(id);
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable("id") UUID postId,@RequestAttribute("id") UUID userId) {
+        postService.deletePost(postId,userId);
 
         ApiResponse<Void> response = new ApiResponse<>(
                 "Post deleted successfully.",

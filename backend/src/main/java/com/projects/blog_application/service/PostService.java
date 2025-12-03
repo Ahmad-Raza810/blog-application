@@ -20,7 +20,7 @@ public interface PostService {
 
     Post getPost(UUID id);
 
-    void deletePost(UUID id);
+    void deletePost(UUID postId,UUID userId);
 
     List<Post> getAllPostByUserId(UUID userid);
 }
