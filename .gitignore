@@ -14,6 +14,7 @@
 # IDE / Editor
 # =========================
 .idea/
+target
 *.iml
 .vscode/*
 !.vscode/extensions.json
