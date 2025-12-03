@@ -1,7 +1,12 @@
-../.idea
-.mvn
-.gitattributes
-mvnw.cmd
-HELP.md
+# IntelliJ
+.idea/
+*.iml
+
+# Maven
+target/
+.mvn/
 mvnw
-../target
+mvnw.cmd
+
+# Misc
+HELP.md
