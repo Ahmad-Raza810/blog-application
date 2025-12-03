@@ -33,13 +33,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/categories").authenticated()
 
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/drafts").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/posts/user").authenticated()
+
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts", "/api/v1/posts/*").permitAll()
 
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/v1/posts/*").authenticated()
-
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/posts/user").authenticated()
 
                 .requestMatchers(HttpMethod.POST, "/api/v1/tags").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
