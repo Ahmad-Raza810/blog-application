@@ -1,7 +1,7 @@
 package com.projects.blog_application.exception;
 
-public class NotAllowedToUpdatePostException extends RuntimeException {
-    public NotAllowedToUpdatePostException(String message) {
+public class NotAllowedOperationException extends RuntimeException {
+    public NotAllowedOperationException(String message) {
         super(message);
     }
 }

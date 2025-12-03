@@ -124,8 +124,8 @@ public class ErrorController {
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(NotAllowedToUpdatePostException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotAllowedToUpdatePost(NotAllowedToUpdatePostException exception) {
+    @ExceptionHandler(NotAllowedOperationException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotAllowedToUpdatePost(NotAllowedOperationException exception) {
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                 .status(HttpStatus.FORBIDDEN.value())
