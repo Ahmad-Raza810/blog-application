@@ -1,12 +1,11 @@
 package com.projects.blog_application.domain.entities;
 
 
+import com.projects.blog_application.domain.Roles;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,7 +13,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -39,12 +39,12 @@ public class User {
     private List<Post> posts=new ArrayList<>();
 
     private LocalDateTime createdAt;
-
+    @Enumerated(EnumType.STRING)
+    private Roles userRole;
 
     @PrePersist
     protected void onCreate(){
         this.createdAt=LocalDateTime.now();
     }
-
 
 }
