@@ -1,448 +1,142 @@
-# Blog Platform
+# 🚀 Spring React Blog Platform
 
-A modern, full-featured blog platform built with a robust Spring Boot backend and a dynamic React frontend. This project offers comprehensive content management capabilities, secure authentication, and a polished user interface.
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.0-green.svg)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 🚀 Project Overview
+A robust, full-stack blogging platform designed for developers and content creators. Built with a powerful **Spring Boot** backend and a dynamic **React** frontend, this project demonstrates modern web development practices, clean architecture, and secure authentication.
 
-The platform consists of two main applications:
-1.  **Backend API**: A Spring Boot application providing RESTful endpoints, JWT authentication, and MySQL persistence.
-2.  **Frontend Client**: A React application using Vite and Tailwind CSS for a responsive and interactive user experience.
+Whether you're looking to learn full-stack development, contribute to an open-source project, or build your own content hub, this platform provides a solid foundation.
 
----
+## ✨ Key Features
 
-# Backend API
-
-A modern, full-featured blog platform built with Spring Boot 3.4.0, offering robust content management capabilities with JWT authentication, category organization, and flexible tagging system.
-
-## 🚀 Features
-
-- **User Authentication & Authorization**: JWT-based stateless authentication
-- **Post Management**: Create, read, update, and delete blog posts with draft/published states
-- **Category System**: Organize content into hierarchical categories
-- **Flexible Tagging**: Multi-tag support for granular content classification
-- **Reading Time Calculation**: Automatic estimation of article reading duration
-- **RESTful API**: Clean, well-structured endpoints following REST principles
-- **Data Validation**: Comprehensive input validation with meaningful error messages
-
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Java**: JDK 21 or later
-- **Maven**: 3.6+ (bundled with project via Maven Wrapper)
-- **Docker**: Latest version (for running MySQL)
-- **Node.js**: v20+ (optional, for frontend)
+- **🔐 Secure Authentication**: Stateless JWT-based authentication with Spring Security.
+- **📝 Content Management**: comprehensive CRUD operations for posts, categories, and tags.
+- **🏷️ Smart Organization**: Organize content with hierarchical categories and flexible tagging.
+- **⏱️ Smart Features**: Automatic reading time calculation for articles.
+- **🎨 Modern UI**: Responsive, mobile-first design using Tailwind CSS.
+- **⚡ High Performance**: Optimized backend with JPA and fast React frontend powered by Vite.
 
 ## 🛠️ Tech Stack
 
 ### Backend
 - **Framework**: Spring Boot 3.4.0
-- **Security**: Spring Security with JWT (JJWT 0.11.5)
-- **Database**: MySQL with Spring Data JPA
-- **Validation**: Jakarta Validation API
-- **Mapping**: MapStruct 1.6.3
-- **Utilities**: Lombok 1.18.36
+- **Language**: Java 21
+- **Database**: MySQL 8.0+ (Production), H2 (Testing)
+- **Security**: Spring Security + JWT
+- **ORM**: Spring Data JPA
+- **Tools**: Lombok, MapStruct, Maven
 
-### Database
-- **Primary**: MySQL 8.0+
-- **Testing**: H2 (in-memory)
+### Frontend
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **Language**: TypeScript
 
-## 📦 Installation & Setup
+## 🚀 Getting Started
 
-### 1. Clone the Repository
+Follow these steps to set up the project locally for development.
+
+### Prerequisites
+
+Ensure you have the following installed:
+- **Java JDK 21** or later
+- **Node.js v20** or later
+- **MySQL 8.0** or later
+- **Git**
+
+### 1. Database Setup
+
+Create a MySQL database for the application. You can use your preferred SQL client or command line:
+
+```sql
+CREATE DATABASE blog_db;
+```
+
+*Note: The application is configured to use `blog_user` with password `changemeinprod!`. You can update these in `src/main/resources/application.properties` or create a user with these credentials.*
+
+### 2. Backend Setup
+
+Navigate to the project root and build the backend:
 
 ```bash
-git clone <repository-url>
+# Clone the repository
+git clone https://github.com/yourusername/blog-platform.git
 cd blog-platform
-```
 
-### 2. Set Up MySQL Database
-
-Create a `docker-compose.yml` file in the project root:
-
-```yaml
-services:
-  mysql:
-    image: mysql:8.0
-    container_name: blog-mysql
-    ports:
-      - "3306:3306"
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: blog_db
-      MYSQL_USER: blog_user
-      MYSQL_PASSWORD: changemeinprod!
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  # Optional: Database management interface
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: blog-phpmyadmin
-    restart: always
-    ports:
-      - "8888:80"
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: rootpassword
-
-volumes:
-  mysql_data:
-```
-
-Start the database:
-
-```bash
-docker-compose up -d
-```
-
-Access phpMyAdmin at `http://localhost:8888` with:
-- **Server**: mysql
-- **Username**: blog_user (or root)
-- **Password**: changemeinprod! (or rootpassword for root)
-
-### 3. Configure Application Properties
-
-Update `src/main/resources/application.properties`:
-
-```properties
-# Server Configuration
-server.port=8080
-
-# MySQL Database Connection
-spring.datasource.url=jdbc:mysql://localhost:3306/blog_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-spring.datasource.username=blog_user
-spring.datasource.password=changemeinprod!
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-
-# JPA/Hibernate Configuration
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
-spring.jpa.open-in-view=false
-
-# JWT Configuration
-jwt.secret=your-256-bit-secret-key-here-make-it-at-least-32-bytes-long-change-this-in-production
-
-# Logging
-logging.level.com.devtiro.blog=DEBUG
-logging.level.org.springframework.security=DEBUG
-```
-
-⚠️ **Important**: Change the JWT secret and database credentials in production!
-
-### 4. Build the Project
-
-```bash
-# Windows
-.\mvnw clean install
-
-# macOS/Linux
+# Build the project
 ./mvnw clean install
-```
 
-### 5. Run the Application
-
-```bash
-# Windows
-.\mvnw spring-boot:run
-
-# macOS/Linux
+# Run the application
 ./mvnw spring-boot:run
 ```
 
-The API will be available at `http://localhost:8080`
+The backend API will start at `http://localhost:8080`.
 
-## 🧪 Running Tests
+### 3. Frontend Setup
 
-The application uses H2 in-memory database for testing, no MySQL required:
-
-```bash
-# Run all tests
-./mvnw test
-
-# Run with coverage
-./mvnw clean test jacoco:report
-```
-
-Test configuration is automatically loaded from `src/test/resources/application.properties`.
-
-## 📚 API Documentation
-
-### Base URL
-```
-http://localhost:8080/api/v1
-```
-
-### Authentication
-
-#### Register/Login
-```http
-POST /api/v1/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@test.com",
-  "password": "password"
-}
-
-Response:
-{
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "expiresIn": 86400
-}
-```
-
-**Default Test User**:
-- Email: `user@test.com`
-- Password: `password`
-
-### Categories
-
-#### List All Categories
-```http
-GET /api/v1/categories
-```
-
-#### Create Category
-```http
-POST /api/v1/categories
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "Technology"
-}
-```
-
-#### Delete Category
-```http
-DELETE /api/v1/categories/{id}
-Authorization: Bearer <token>
-```
-
-### Tags
-
-#### List All Tags
-```http
-GET /api/v1/tags
-```
-
-#### Create Tags
-```http
-POST /api/v1/tags
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "names": ["spring-boot", "java", "tutorial"]
-}
-```
-
-#### Delete Tag
-```http
-DELETE /api/v1/tags/{id}
-Authorization: Bearer <token>
-```
-
-### Posts
-
-#### List Published Posts
-```http
-GET /api/v1/posts
-GET /api/v1/posts?categoryId={categoryId}
-GET /api/v1/posts?tagId={tagId}
-GET /api/v1/posts?categoryId={categoryId}&tagId={tagId}
-```
-
-#### Get Single Post
-```http
-GET /api/v1/posts/{id}
-```
-
-#### List Draft Posts (Authenticated)
-```http
-GET /api/v1/posts/drafts
-Authorization: Bearer <token>
-```
-
-#### Create Post
-```http
-POST /api/v1/posts
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "title": "Getting Started with Spring Boot",
-  "content": "Spring Boot makes it easy to create stand-alone...",
-  "categoryId": "uuid-here",
-  "tagIds": ["uuid-1", "uuid-2"],
-  "status": "DRAFT"
-}
-```
-
-#### Update Post
-```http
-PUT /api/v1/posts/{id}
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "id": "post-uuid",
-  "title": "Updated Title",
-  "content": "Updated content...",
-  "categoryId": "uuid-here",
-  "tagIds": ["uuid-1", "uuid-2"],
-  "status": "PUBLISHED"
-  "readTime": 5
-}
-```
-
-#### Delete Post
-```http
-DELETE /api/v1/posts/{id}
-Authorization: Bearer <token>
-```
-
-## 🏗️ Project Structure
-
-```
-src/main/java/com/devtiro/blog/
-├── config/              # Configuration classes (Security, etc.)
-├── controllers/         # REST API endpoints
-├── domain/
-│   ├── entities/        # JPA entities
-│   ├── dtos/            # Data Transfer Objects
-│   └── PostStatus.java  # Enums
-├── mappers/             # MapStruct mappers
-├── repositories/        # Spring Data JPA repositories
-├── security/            # Security components (JWT filter, UserDetails)
-└── services/            # Business logic
-    └── impl/            # Service implementations
-```
-
-## 🔐 Security Features
-
-- **JWT Authentication**: Stateless authentication with 24-hour token expiration
-- **Password Encryption**: BCrypt password encoding with DelegatingPasswordEncoder
-- **Role-Based Access**: ROLE_USER for authenticated operations
-- **Public Endpoints**: GET requests for posts, categories, and tags are publicly accessible
-- **Protected Operations**: Creating, updating, and deleting content requires authentication
-
-## 🗄️ Database Schema
-
-### Main Tables
-- **users**: User accounts with encrypted passwords
-- **posts**: Blog posts with content, status, and metadata
-- **categories**: Content categories
-- **tags**: Flexible content tags
-- **post_tags**: Many-to-many relationship between posts and tags
-
-### Relationships
-- User → Posts (One-to-Many)
-- Category → Posts (One-to-Many)
-- Post ↔ Tags (Many-to-Many)
-
-## 🚦 Error Handling
-
-The API returns consistent error responses:
-
-```json
-{
-  "status": 400,
-  "message": "Category already exists with name: Technology",
-  "errors": [
-    {
-      "field": "name",
-      "message": "Validation failed"
-    }
-  ]
-}
-```
-
----
-
-# Frontend Application
-
-The frontend is a modern React application designed to consume the Blog Platform API.
-
-## 🛠️ Tech Stack
-- **Framework**: React 18
-- **Build Tool**: Vite
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Linting**: ESLint
-
-## 📦 Installation & Setup
-
-### 1. Install Dependencies
-Ensure you are in the frontend directory (where `package.json` is located):
+Open a new terminal, navigate to the frontend directory, and start the development server:
 
 ```bash
+cd frontend
+
+# Install dependencies
 npm install
-```
 
-### 2. Run Development Server
-Start the local development server:
-
-```bash
+# Start the dev server
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`.
+The frontend application will be available at `http://localhost:5173`.
 
-### 3. Build for Production
-To create a production build:
+## 📚 API Documentation
 
-```bash
-npm run build
-```
+The backend exposes a RESTful API. Here are some of the key endpoints:
 
-## 🎨 Features
-- **Responsive Design**: Built with Tailwind CSS for mobile-first responsiveness.
-- **Modern Architecture**: Uses React Hooks and Functional Components.
-- **Type Safety**: Fully typed with TypeScript for better developer experience.
-- **Fast Tooling**: Powered by Vite for instant server start and HMR.
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/login` | Authenticate user and receive JWT |
 
----
+### User Profile
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/user` | Get current user's profile (Requires Auth) |
 
-# Contributing
+### Posts
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/posts` | List all published posts |
+| `GET` | `/api/v1/posts/{id}` | Get a specific post by ID |
+| `POST` | `/api/v1/posts` | Create a new post (Requires Auth) |
+| `PUT` | `/api/v1/posts/{id}` | Update an existing post (Requires Auth) |
+| `DELETE` | `/api/v1/posts/{id}` | Delete a post (Requires Auth) |
 
-Thank you for your interest in contributing! We welcome all contributions from the community.
+### Categories & Tags
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/categories` | List all categories |
+| `GET` | `/api/v1/tags` | List all tags |
 
-### Prerequisites
-- Java JDK 21+
-- Maven 3.6+
-- Node.js v20+
-- Git
+*For a full list of endpoints, refer to the controller classes in `src/main/java/com/projects/blog_application/controllers`.*
 
-### Setup
-1. **Fork and clone**:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/blog-platform.git
-   cd blog-platform
-   ```
+## 🤝 Contributing
 
-2. **Install Backend**:
-   ```bash
-   ./mvnw clean install
-   ```
+We love contributions! Here's how you can help make this project better:
 
-3. **Install Frontend**:
-   ```bash
-   cd frontend
-   npm install
-   ```
+1.  **Fork** the repository.
+2.  Create a new **Branch** for your feature or bug fix (`git checkout -b feature/amazing-feature`).
+3.  **Commit** your changes (`git commit -m 'Add some amazing feature'`).
+4.  **Push** to the branch (`git push origin feature/amazing-feature`).
+5.  Open a **Pull Request**.
 
-## 🐛 Reporting Issues
-**Found a bug?** Open an issue with:
-- Clear description
-- Steps to reproduce
-- Expected vs actual behavior
-- Environment details (OS, Java/Node version)
+Please ensure your code follows the existing style and passes all tests.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-**Thank you for contributing! 🎉**
+
+Made with ❤️ by [Ahmad Raza]
