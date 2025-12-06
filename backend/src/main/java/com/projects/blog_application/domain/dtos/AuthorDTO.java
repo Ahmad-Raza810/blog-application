@@ -1,5 +1,6 @@
 package com.projects.blog_application.domain.dtos;
 
+import com.projects.blog_application.domain.Roles;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,4 +14,5 @@ public class AuthorDTO {
 
     private UUID id;
     private String name;
+    private Roles userRole;
 }

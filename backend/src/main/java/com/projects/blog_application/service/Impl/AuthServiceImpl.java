@@ -1,5 +1,6 @@
 package com.projects.blog_application.service.Impl;
 
+import com.projects.blog_application.domain.Roles;
 import com.projects.blog_application.domain.dtos.AuthResponseDTO;
 import com.projects.blog_application.domain.dtos.LoginRequestDTO;
 import com.projects.blog_application.domain.dtos.RegisterRequestDTO;
@@ -56,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
             throw new UserAlreadyExistsException("user already exists with provided email.");
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setUserRole(Roles.USER);
         return userMapper.toDto(userRepository.save(user));
     }
 
