@@ -124,6 +124,7 @@ public class ErrorController {
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
+    //not allowed to update post handler
     @ExceptionHandler(NotAllowedOperationException.class)
     public ResponseEntity<ApiErrorResponse> handleNotAllowedToUpdatePost(NotAllowedOperationException exception) {
 
@@ -133,6 +134,26 @@ public class ErrorController {
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    //refresh token invalid exception handler
+    @ExceptionHandler(RefreshTokenInvalidException.class)
+    public ResponseEntity<ApiErrorResponse> handleRefreshTokenInvalid(RefreshTokenInvalidException exception) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message(exception.getMessage())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    //refresh token expired exception handler
+    @ExceptionHandler(RefreshTokenExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleRefreshTokenExpired(RefreshTokenExpiredException exception) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message(exception.getMessage())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
 
