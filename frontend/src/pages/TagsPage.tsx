@@ -1,274 +1,110 @@
-import React, { useEffect, useState } from "react";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  Input,
-  Table,
-  TableHeader,
-  TableBody,
-  TableColumn,
-  TableRow,
-  TableCell,
-  useDisclosure,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Chip,
-  Tooltip,
-} from "@nextui-org/react";
-import { Plus, Trash2, X, Tags, AlertCircle, FileText, Tag as TagIcon } from "lucide-react";
-import { apiService, Tag, extractErrorMessage, extractValidationErrors } from "../services/apiService";
+import React, { useEffect, useState } from 'react';
+import { Card, CardBody, Input, Chip } from '@nextui-org/react';
+import { Tag as TagIcon, Search, Hash } from 'lucide-react';
+import { apiService, Tag, extractErrorMessage } from '../services/apiService';
+import { motion } from 'framer-motion';
+import { pageVariants, container, item } from '../utils/animation-utils';
 
 interface TagsPageProps {
-  isAuthenticated: boolean;
+  isAuthenticated?: boolean;
 }
 
 const TagsPage: React.FC<TagsPageProps> = ({ isAuthenticated }) => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newTags, setNewTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null); // For validation errors in modal
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getTags();
+        setTags(data);
+      } catch (err) {
+        setError(extractErrorMessage(err, 'Failed to load tags'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchTags();
   }, []);
 
-  const fetchTags = async () => {
-    try {
-      setLoading(true);
-      const response = await apiService.getTags();
-      setTags(response);
-      setError(null);
-    } catch (err) {
-      setError(extractErrorMessage(err, "Failed to load tags. Please try again later."));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddTags = async () => {
-    if (newTags.length === 0) {
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      setValidationError(null); // Clear previous validation errors
-      setError(null); // Clear general error
-      
-      await apiService.createTags(newTags);
-      await fetchTags();
-      handleModalClose();
-    } catch (err) {
-      const validationErrors = extractValidationErrors(err);
-      
-      // Check if there are field-specific validation errors
-      if (Object.keys(validationErrors).length > 0) {
-        // Display validation errors - could be for "names", "names[0]", etc.
-        const errorMessages = Object.values(validationErrors);
-        // Show the first validation error or combine them
-        setValidationError(errorMessages[0] || 'Validation error occurred');
-      } else {
-        // If no validation errors, show general error message
-        setError(extractErrorMessage(err, "Failed to create tags. Please try again."));
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (tag: Tag) => {
-    if (
-      !window.confirm(`Are you sure you want to delete the tag "${tag.name}"?`)
-    ) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await apiService.deleteTag(tag.id);
-      await fetchTags();
-    } catch (err) {
-      setError(extractErrorMessage(err, "Failed to delete tag. Please try again."));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleModalClose = () => {
-    setNewTags([]);
-    setTagInput("");
-    setValidationError(null); // Clear validation errors when closing modal
-    setError(null); // Clear general error
-    onClose();
-  };
-
-  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      const value = tagInput.trim().toLowerCase();
-      if (value && !newTags.includes(value)) {
-        setNewTags([...newTags, value]);
-        setTagInput("");
-      }
-    } else if (e.key === "Backspace" && !tagInput && newTags.length > 0) {
-      setNewTags(newTags.slice(0, -1));
-    }
-  };
-
-  const handleRemoveNewTag = (tagToRemove: string) => {
-    setNewTags(newTags.filter((tag) => tag !== tagToRemove));
-  };
+  const filteredTags = tags.filter(tag =>
+    tag.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="max-w-4xl mx-auto px-4">
-      <Card>
-        <CardHeader className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Tags className="text-primary" size={24} />
-            <h1 className="text-2xl font-bold">Tags</h1>
-          </div>
-          {isAuthenticated && (
-            <Button
-              color="primary"
-              startContent={<Plus size={16} />}
-              onClick={onOpen}
-            >
-              Add Tags
-            </Button>
-          )}
-        </CardHeader>
-
-        <CardBody>
-          {error && (
-            <div className="mb-4 p-4 text-red-500 bg-red-50 rounded-lg border border-red-200 flex items-start gap-3">
-              <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <Table
-            aria-label="Tags table"
-            isHeaderSticky
+    <motion.div
+      className="max-w-6xl mx-auto px-4 py-8"
+      initial="initial"
+      animate="animate"
+      variants={pageVariants}
+    >
+      <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+        <div>
+          <h1 className="text-4xl font-display font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300">
+            Browse Tags
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 text-lg">
+            Find posts by specific keywords and topics
+          </p>
+        </div>
+        <div className="w-full md:w-72">
+          <Input
+            placeholder="Search tags..."
+            startContent={<Search size={18} className="text-default-400" />}
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            variant="bordered"
+            radius="full"
             classNames={{
-              wrapper: "max-h-[600px]",
+              inputWrapper: "bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-shadow"
             }}
-          >
-            <TableHeader>
-              <TableColumn>NAME</TableColumn>
-              <TableColumn>POST COUNT</TableColumn>
-              <TableColumn>ACTIONS</TableColumn>
-            </TableHeader>
-            <TableBody
-              isLoading={loading}
-              loadingContent={<div>Loading tags...</div>}
-            >
-              {tags.map((tag) => (
-                <TableRow key={tag.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <TagIcon size={16} className="text-primary" />
-                      {tag.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <FileText size={14} className="text-default-400" />
-                      {tag.postCount || 0}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {isAuthenticated ? (
-                      <Tooltip
-                        content={
-                          tag.postCount
-                            ? "Cannot delete tag with existing posts"
-                            : "Delete tag"
-                        }
-                      >
-                        <Button
-                          isIconOnly
-                          variant="flat"
-                          color="danger"
-                          size="sm"
-                          onClick={() => handleDelete(tag)}
-                          isDisabled={
-                            tag?.postCount ? tag.postCount > 0 : false
-                          }
-                        >
-                          <Trash2 size={16} />
-                        </Button>
-                      </Tooltip>
-                    ) : (
-                      <span>-</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardBody>
-      </Card>
+          />
+        </div>
+      </div>
 
-      <Modal isOpen={isOpen} onClose={handleModalClose}>
-        <ModalContent>
-          <ModalHeader className="flex items-center gap-2">
-            <Tags size={20} />
-            Add Tags
-          </ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <Input
-                label="Enter tags"
-                placeholder="Type and press Enter or comma to add tags"
-                value={tagInput}
-                onChange={(e) => {
-                  setTagInput(e.target.value);
-                  setValidationError(null); // Clear error when user types
-                }}
-                onKeyDown={handleTagInputKeyDown}
-                isInvalid={!!validationError}
-                errorMessage={validationError || undefined}
-                startContent={<TagIcon size={16} className="text-default-400" />}
-              />
-              <div className="flex flex-wrap gap-2">
-                {newTags.map((tag) => (
-                  <Chip
-                    key={tag}
-                    onClose={() => handleRemoveNewTag(tag)}
-                    variant="flat"
-                    endContent={<X size={14} />}
-                  >
-                    {tag}
-                  </Chip>
-                ))}
-              </div>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="flat" onClick={handleModalClose}>
-              Cancel
-            </Button>
-            <Button
-              color="primary"
-              onClick={handleAddTags}
-              isLoading={isSubmitting}
-              isDisabled={newTags.length === 0}
+      {loading ? (
+        <div className="flex flex-wrap gap-4">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+            <div key={i} className="h-10 w-24 animate-pulse bg-default-100 rounded-full" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <p className="text-red-500">{error}</p>
+        </div>
+      ) : (
+        <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/20 dark:border-slate-700/30 shadow-lg p-6">
+          <CardBody>
+            <motion.div
+              className="flex flex-wrap gap-4 justify-center"
+              variants={container}
+              initial="hidden"
+              animate="show"
             >
-              Add Tags
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </div>
+              {filteredTags.map((tag) => (
+                <motion.div key={tag.id} variants={item}>
+                  <Chip
+                    variant="flat"
+                    classNames={{
+                      base: "h-auto py-2 px-4 bg-white dark:bg-slate-700 hover:bg-primary hover:text-white transition-all cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-1 border border-slate-200 dark:border-slate-600",
+                      content: "flex items-center gap-2 text-base font-medium"
+                    }}
+                  >
+                    <Hash size={14} />
+                    {tag.name}
+                    <span className="text-xs opacity-70 ml-1">({tag.postCount})</span>
+                  </Chip>
+                </motion.div>
+              ))}
+            </motion.div>
+          </CardBody>
+        </Card>
+      )}
+    </motion.div>
   );
 };
 
