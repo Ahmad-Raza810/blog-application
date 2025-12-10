@@ -1,356 +1,207 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Card,
-  CardBody,
-  Input,
-  Select,
-  SelectItem,
-  Chip,
-  SelectSection,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem
-} from '@nextui-org/react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Heading from '@tiptap/extension-heading';
-import BulletList from '@tiptap/extension-bullet-list';
-import OrderedList from '@tiptap/extension-ordered-list';
-import ListItem from '@tiptap/extension-list-item';
-import { 
-  Bold, 
-  Italic, 
-  Undo, 
-  Redo,
-  List,
-  ListOrdered,
-  ChevronDown,
-  X
-} from 'lucide-react';
-import { Post, Category, Tag, PostStatus } from '../services/apiService';
+import { apiService, Category, Tag, Post } from '../services/apiService';
+import { Input, Button, Select, SelectItem, Chip, Spinner } from '@nextui-org/react';
+import { Save, X, Image as ImageIcon, Type, Hash, BookOpen } from 'lucide-react';
 
 interface PostFormProps {
-  initialPost?: Post | null;
-  onSubmit: (postData: {
-    title: string;
-    content: string;
-    categoryId: string;
-    tagIds: string[];
-    status: PostStatus;
-  }) => Promise<void>;
-  onCancel: () => void;
-  categories: Category[];
-  availableTags: Tag[];
-  isSubmitting?: boolean;
-  backendErrors?: Record<string, string>; // Validation errors from backend
+  postId?: string;
 }
 
-const PostForm: React.FC<PostFormProps> = ({
-  initialPost,
-  onSubmit,
-  onCancel,
-  categories,
-  availableTags,
-  isSubmitting = false,
-  backendErrors = {},
-}) => {
-  const [title, setTitle] = useState(initialPost?.title || '');
-  const [categoryId, setCategoryId] = useState(initialPost?.category?.id || '');
-  const [selectedTags, setSelectedTags] = useState<Tag[]>(initialPost?.tags || []);
-  const [status, setStatus] = useState<PostStatus>(
-    initialPost?.status || PostStatus.DRAFT
-  );
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  // Update errors when backendErrors prop changes
-  useEffect(() => {
-    if (Object.keys(backendErrors).length > 0) {
-      setErrors(prevErrors => ({ ...prevErrors, ...backendErrors }));
-    }
-  }, [backendErrors]);
+const PostForm: React.FC<PostFormProps> = ({ postId }) => {
+  const navigate = useNavigate();
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set([]));
+  const [coverImage, setCoverImage] = useState('');
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: false, // Disable default heading to use our custom config
-        bulletList: false, // Disable default list to use our custom config
-        orderedList: false, // Disable default list to use our custom config
-      }),
-      Heading.configure({
-        levels: [1, 2, 3],
-      }),
-      BulletList.configure({
-        keepMarks: true,
-        keepAttributes: false,
-      }),
-      OrderedList.configure({
-        keepMarks: true,
-        keepAttributes: false,
-      }),
-      ListItem,
-    ],
-    content: initialPost?.content || '',
+    extensions: [StarterKit],
+    content: '',
+    onUpdate: ({ editor }) => {
+      setContent(editor.getHTML());
+    },
     editorProps: {
       attributes: {
-        class: 'prose max-w-none focus:outline-none min-h-[400px] px-4 py-2 border rounded-lg',
+        class: 'prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[300px] px-4 py-2',
       },
     },
   });
 
   useEffect(() => {
-    if (initialPost && editor) {
-      setTitle(initialPost.title);
-      editor.commands.setContent(initialPost.content);
-      setCategoryId(initialPost.category?.id);
-      setSelectedTags(initialPost.tags);
-      setStatus(initialPost.status || PostStatus.DRAFT);
-    }
-  }, [initialPost, editor]);
+    const fetchData = async () => {
+      try {
+        const [categoriesData, tagsData] = await Promise.all([
+          apiService.getCategories(),
+          apiService.getTags(),
+        ]);
+        setCategories(categoriesData);
+        setTags(tagsData);
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+        if (postId) {
+          const post = await apiService.getPost(postId);
+          setTitle(post.title);
+          setContent(post.content);
+          setCategoryId(post.category.id);
+          setSelectedTagIds(new Set(post.tags.map((t) => t.id)));
+          setCoverImage(post.coverImage || ''); // Assuming API supports coverImage now or ignore if not
+          editor?.commands.setContent(post.content);
+        }
+      } catch (err) {
+        setError('Failed to load data');
+      } finally {
+        setInitialLoading(false);
+      }
+    };
 
-    if (!title.trim()) {
-      newErrors.title = 'Title is required';
-    }
-    if (!editor?.getHTML() || editor?.getHTML() === '<p></p>') {
-      newErrors.content = 'Content is required';
-    }
-    if (!categoryId) {
-      newErrors.category = 'Category is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    fetchData();
+  }, [postId, editor]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    if (!validateForm()) {
-      return;
+    try {
+      const postData = {
+        title,
+        content,
+        categoryId,
+        tagIds: Array.from(selectedTagIds),
+        coverImage,
+      };
+
+      if (postId) {
+        await apiService.updatePost(postId, postData);
+      } else {
+        await apiService.createPost(postData);
+      }
+      navigate('/');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to save post');
+    } finally {
+      setLoading(false);
     }
-
-    await onSubmit({
-      title: title.trim(),
-      content: editor?.getHTML() || '',
-      categoryId: categoryId,
-      tagIds: selectedTags.map(tag => tag.id),
-      status,
-    });
   };
 
-  const handleTagAdd = (tag: Tag) => {
-    if (tag && !selectedTags.includes(tag) && selectedTags.length < 10) {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
-
-  const handleTagRemove = (tagToRemove: Tag) => {
-    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
-  };
-
-  const handleHeadingSelect = (level: number) => {
-    editor?.chain().focus().toggleHeading({ level }).run();
-  };
-
-  const suggestedTags = availableTags
-    .filter(tag => !selectedTags.includes(tag))
-    .slice(0, 5);
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" color="primary" />
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <Card>
-        <CardBody className="space-y-4">
-          <div className="space-y-2">
-            <Input
-              label="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              isInvalid={!!errors.title}
-              errorMessage={errors.title}
-              isRequired
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="flex flex-col h-full">
+      {error && (
+        <div className="bg-danger-50 text-danger p-4 mb-6 rounded-lg border border-danger-100 mx-6 mt-6">
+          {error}
+        </div>
+      )}
 
-          <div className="space-y-2">
-            <div className="bg-default-100 p-2 rounded-lg mb-2 flex gap-2 flex-wrap items-center">
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button
-                    variant="flat"
-                    size="sm"
-                    endContent={<ChevronDown size={16} />}
-                  >
-                    Heading
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  onAction={(key) => handleHeadingSelect(Number(key))}
-                  aria-label="Heading levels"
-                >
-                  <DropdownItem key="1" className={editor?.isActive('heading', { level: 1 }) ? 'bg-default-200' : ''}>
-                    Heading 1
-                  </DropdownItem>
-                  <DropdownItem key="2" className={editor?.isActive('heading', { level: 2 }) ? 'bg-default-200' : ''}>
-                    Heading 2
-                  </DropdownItem>
-                  <DropdownItem key="3" className={editor?.isActive('heading', { level: 3 }) ? 'bg-default-200' : ''}>
-                    Heading 3
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
+      <div className="p-6 md:p-8 space-y-6 border-b border-divider">
+        <Input
+          label="Post Title"
+          placeholder="Enter an engaging title..."
+          value={title}
+          onValueChange={setTitle}
+          variant="bordered"
+          size="lg"
+          classNames={{
+            input: "text-2xl font-bold font-display",
+            inputWrapper: "border-none shadow-none bg-transparent px-0 data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent",
+            label: "hidden"
+          }}
+          startContent={<Type size={24} className="text-default-300 mr-2" />}
+        />
 
-              <Button
-                size="sm"
-                isIconOnly
-                variant="flat"
-                onClick={() => editor?.chain().focus().toggleBold().run()}
-                className={editor?.isActive('bold') ? 'bg-default-200' : ''}
-              >
-                <Bold size={16} />
-              </Button>
-              <Button
-                size="sm"
-                isIconOnly
-                variant="flat"
-                onClick={() => editor?.chain().focus().toggleItalic().run()}
-                className={editor?.isActive('italic') ? 'bg-default-200' : ''}
-              >
-                <Italic size={16} />
-              </Button>
-
-              <div className="h-6 w-px bg-default-300 mx-2" />
-
-              <Button
-                size="sm"
-                isIconOnly
-                variant="flat"
-                onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                className={editor?.isActive('bulletList') ? 'bg-default-200' : ''}
-              >
-                <List size={16} />
-              </Button>
-              <Button
-                size="sm"
-                isIconOnly
-                variant="flat"
-                onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-                className={editor?.isActive('orderedList') ? 'bg-default-200' : ''}
-              >
-                <ListOrdered size={16} />
-              </Button>
-
-              <div className="h-6 w-px bg-default-300 mx-2" />
-
-              <Button
-                size="sm"
-                isIconOnly
-                variant="flat"
-                onClick={() => editor?.chain().focus().undo().run()}
-                isDisabled={!editor?.can().undo()}
-              >
-                <Undo size={16} />
-              </Button>
-              <Button
-                size="sm"
-                isIconOnly
-                variant="flat"
-                onClick={() => editor?.chain().focus().redo().run()}
-                isDisabled={!editor?.can().redo()}
-              >
-                <Redo size={16} />
-              </Button>
-            </div>
-            <EditorContent editor={editor} />
-            {errors.content && (
-              <div className="text-danger text-sm">{errors.content}</div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Select
-              label="Category"
-              selectedKeys={categoryId ? [categoryId] : []}
-              onChange={(e) => setCategoryId(e.target.value)}
-              isInvalid={!!errors.category}
-              errorMessage={errors.category}
-              isRequired
-            >
-              {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Select
-              label="Add Tags"
-              selectedKeys={selectedTags.map(tag => tag.id)}>
-              <SelectSection>
-                {suggestedTags.map((tag) => (
-                  <SelectItem
-                    key={tag.id}
-                    value={tag.id}
-                    onClick={() => handleTagAdd(tag)}
-                  >
-                    {tag.name}
-                  </SelectItem>
-                ))}
-              </SelectSection>
-            </Select>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {selectedTags.map((tag) => (
-                <Chip
-                  key={tag.id}
-                  onClose={() => handleTagRemove(tag)}
-                  variant="flat"
-                  endContent={<X size={14} />}
-                >
-                  {tag.name}
-                </Chip>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Select
-              label="Status"
-              selectedKeys={[status]}
-              onChange={(e) => setStatus(e.target.value as PostStatus)}
-            >
-              <SelectItem key={PostStatus.DRAFT} value={PostStatus.DRAFT}>
-                Draft
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Select
+            label="Category"
+            placeholder="Select a category"
+            selectedKeys={categoryId ? [categoryId] : []}
+            onChange={(e) => setCategoryId(e.target.value)}
+            startContent={<BookOpen size={18} className="text-default-400" />}
+            variant="bordered"
+          >
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
               </SelectItem>
-              <SelectItem key={PostStatus.PUBLISHED} value={PostStatus.PUBLISHED}>
-                Published
-              </SelectItem>
-            </Select>
-          </div>
+            ))}
+          </Select>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              color="danger"
-              variant="flat"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="primary"
-              type="submit"
-              isLoading={isSubmitting}
-            >
-              {initialPost ? 'Update' : 'Create'} Post
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
+          <Select
+            label="Tags"
+            placeholder="Select tags"
+            selectionMode="multiple"
+            selectedKeys={selectedTagIds}
+            onSelectionChange={(keys) => setSelectedTagIds(keys as Set<string>)}
+            startContent={<Hash size={18} className="text-default-400" />}
+            variant="bordered"
+            renderValue={(items) => {
+              return (
+                <div className="flex flex-wrap gap-2">
+                  {items.map((item) => (
+                    <Chip key={item.key} size="sm" variant="flat" color="primary">
+                      {item.textValue}
+                    </Chip>
+                  ))}
+                </div>
+              );
+            }}
+          >
+            {tags.map((tag) => (
+              <SelectItem key={tag.id} value={tag.id}>
+                {tag.name}
+              </SelectItem>
+            ))}
+          </Select>
+        </div>
+
+        <Input
+          label="Cover Image URL"
+          placeholder="https://example.com/image.jpg"
+          value={coverImage}
+          onValueChange={setCoverImage}
+          startContent={<ImageIcon size={18} className="text-default-400" />}
+          variant="bordered"
+        />
+      </div>
+
+      {/* Editor Toolbar could go here */}
+      <div className="flex-grow bg-slate-50 dark:bg-slate-900/30 min-h-[400px]">
+        <EditorContent editor={editor} className="h-full p-6 md:p-8" />
+      </div>
+
+      <div className="p-6 border-t border-divider flex justify-end gap-3 bg-white dark:bg-slate-900 rounded-b-2xl">
+        <Button
+          variant="flat"
+          color="danger"
+          startContent={<X size={18} />}
+          onPress={() => navigate('/')}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          className="bg-gradient-primary text-white shadow-lg font-semibold"
+          isLoading={loading}
+          startContent={!loading && <Save size={18} />}
+        >
+          {postId ? 'Update Post' : 'Publish Post'}
+        </Button>
+      </div>
     </form>
   );
 };
