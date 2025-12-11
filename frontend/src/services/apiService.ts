@@ -28,6 +28,7 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
   createdAt?: string;
   updatedAt?: string;
   // Add more fields as available from backend
@@ -49,6 +50,7 @@ export interface Post {
   id: string;
   title: string;
   content: string;
+  coverImage?: string;
   author?: {
     id: string;
     name: string;

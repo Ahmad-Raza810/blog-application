@@ -5,6 +5,7 @@ interface AuthUser {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
 }
 
 interface AuthContextType {
@@ -66,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = useCallback(async (email: string, password: string) => {
     try {
       const response = await apiService.login({ email, password });
-      
+
       localStorage.setItem('token', response.token);
       setToken(response.token);
       setIsAuthenticated(true);
