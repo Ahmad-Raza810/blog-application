@@ -21,43 +21,48 @@ const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-      navigate('/');
+      // login function in apiService handles redirect
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login. Please check your credentials.');
-    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-[85vh] flex items-center justify-center relative overflow-hidden px-4">
       {/* Background Elements */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -z-10 animate-pulse" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -z-10 animate-pulse delay-1000" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl -z-10 animate-pulse-slow" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl -z-10 animate-pulse-slow lg:delay-1000" />
 
       <motion.div
         initial="initial"
         animate="animate"
         variants={fadeIn}
-        className="w-full max-w-md px-4"
+        className="w-full max-w-md"
       >
-        <Card className="glass-panel border-none">
-          <CardHeader className="flex flex-col gap-3 items-center pt-8 pb-4">
-            <div className="p-3 rounded-xl bg-gradient-primary text-white shadow-lg mb-2">
-              <Sparkles size={24} />
+        <Card className="glass-panel border-white/20 dark:border-white/10 shadow-2xl backdrop-blur-xl">
+          <CardHeader className="flex flex-col gap-4 items-center pt-10 pb-6">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-purple text-white shadow-lg mb-2 shadow-primary-500/30">
+              <Sparkles size={28} />
             </div>
-            <h1 className="text-2xl font-bold text-center">Welcome Back</h1>
-            <p className="text-default-500 text-center text-sm">
-              Sign in to continue your journey
-            </p>
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-display font-bold text-secondary-900 dark:text-white">Welcome Back</h1>
+              <p className="text-secondary-500 dark:text-secondary-400">
+                Sign in to continue your creative journey
+              </p>
+            </div>
           </CardHeader>
 
-          <CardBody className="px-8 pb-8">
+          <CardBody className="px-8 pb-10">
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
               {error && (
-                <div className="p-3 rounded-lg bg-danger-50 text-danger text-sm text-center border border-danger-100">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm text-center border border-red-100 dark:border-red-900/50"
+                >
                   {error}
-                </div>
+                </motion.div>
               )}
 
               <Input
@@ -66,10 +71,12 @@ const LoginPage: React.FC = () => {
                 placeholder="Enter your email"
                 value={email}
                 onValueChange={setEmail}
-                startContent={<Mail className="text-default-400 pointer-events-none flex-shrink-0" size={18} />}
+                startContent={<Mail className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
                 variant="bordered"
+                radius="lg"
                 classNames={{
-                  inputWrapper: "bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm"
+                  inputWrapper: "bg-secondary-50/50 dark:bg-secondary-900/50 border-secondary-200 dark:border-secondary-700 hover:border-primary-500 focus-within:border-primary-500 transition-colors",
+                  label: "text-secondary-600 dark:text-secondary-400"
                 }}
               />
 
@@ -80,37 +87,40 @@ const LoginPage: React.FC = () => {
                   placeholder="Enter your password"
                   value={password}
                   onValueChange={setPassword}
-                  startContent={<Lock className="text-default-400 pointer-events-none flex-shrink-0" size={18} />}
+                  startContent={<Lock className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
                   variant="bordered"
+                  radius="lg"
                   classNames={{
-                    inputWrapper: "bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm"
+                    inputWrapper: "bg-secondary-50/50 dark:bg-secondary-900/50 border-secondary-200 dark:border-secondary-700 hover:border-primary-500 focus-within:border-primary-500 transition-colors",
+                    label: "text-secondary-600 dark:text-secondary-400"
                   }}
                 />
-                <Link to="/forgot-password" className="text-xs text-primary text-right hover:underline">
+                <Link to="/forgot-password" className="text-xs text-primary-600 dark:text-primary-400 text-right hover:text-primary-500 font-medium transition-colors">
                   Forgot password?
                 </Link>
               </div>
 
               <Button
                 type="submit"
-                className="bg-gradient-primary text-white shadow-lg font-semibold"
+                className="bg-gradient-primary text-white shadow-lg shadow-primary-500/30 font-semibold"
                 size="lg"
+                radius="lg"
                 isLoading={isLoading}
-                startContent={!isLoading && <LogIn size={18} />}
+                startContent={!isLoading && <LogIn size={20} />}
               >
                 Sign In
               </Button>
 
               <div className="flex items-center gap-4 py-2">
-                <Divider className="flex-1" />
-                <span className="text-xs text-default-400">OR</span>
-                <Divider className="flex-1" />
+                <Divider className="flex-1 bg-secondary-200 dark:bg-secondary-700" />
+                <span className="text-xs text-secondary-400 font-medium uppercase tracking-wider">OR</span>
+                <Divider className="flex-1 bg-secondary-200 dark:bg-secondary-700" />
               </div>
 
               <div className="text-center text-sm">
-                <span className="text-default-500">Don't have an account? </span>
-                <Link to="/register" className="text-primary font-semibold hover:underline flex items-center justify-center gap-1 inline-flex">
-                  Sign up <ArrowRight size={14} />
+                <span className="text-secondary-500 dark:text-secondary-400">Don't have an account? </span>
+                <Link to="/register" className="text-primary-600 dark:text-primary-400 font-bold hover:text-primary-500 flex items-center justify-center gap-1 inline-flex transition-colors">
+                  Sign up now <ArrowRight size={14} />
                 </Link>
               </div>
             </form>
