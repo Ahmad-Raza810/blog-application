@@ -38,20 +38,14 @@ function AppContent() {
 
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen">
-        <NavBar
-          isAuthenticated={isAuthenticated}
-          userProfile={user ? {
-            name: user.name,
-            avatar: undefined // Add avatar support if needed
-          } : undefined}
-          onLogout={logout}
-        />
-        <main className="container mx-auto py-6 flex-grow">
+      <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
+        <NavBar />
+        <main className="flex-grow pt-16">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/posts/:id" element={<PostPage />} />
             <Route
               path="/posts/new"
               element={
@@ -60,7 +54,6 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/posts/:id" element={<PostPage />} />
             <Route
               path="/posts/:id/edit"
               element={
