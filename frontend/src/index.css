@@ -1,24 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 255 255 255;
+    --background: 248 250 252;
+    /* Slate 50 */
     --foreground: 15 23 42;
+    /* Slate 900 */
+    --primary: 99 102 241;
+    /* Indigo 500 */
+    --primary-foreground: 255 255 255;
   }
 
   .dark {
     --background: 15 23 42;
-    --foreground: 255 255 255;
+    /* Slate 900 */
+    --foreground: 248 250 252;
+    /* Slate 50 */
+    --primary: 99 102 241;
+    --primary-foreground: 255 255 255;
   }
 
   body {
-    @apply bg-background text-foreground antialiased min-h-screen selection:bg-accent-1 selection:text-white;
+    @apply bg-background text-foreground antialiased min-h-screen selection:bg-accent selection:text-white;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display tracking-tight;
   }
 }
@@ -27,7 +43,7 @@
   .glass-panel {
     @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 shadow-xl;
   }
-  
+
   .glass-card {
     @apply bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/20 dark:border-slate-700/30 shadow-lg hover:shadow-xl transition-all duration-300;
   }
