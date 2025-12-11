@@ -1,74 +1,123 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Twitter, Linkedin, Heart, Sparkles } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Heart } from 'lucide-react';
 
-const Footer: React.FC = () => {
+const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="relative mt-20 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-hero opacity-50" />
-
-            <div className="max-w-7xl mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                    <div className="col-span-1 md:col-span-2">
-                        <Link to="/" className="flex items-center gap-2 mb-4 group w-fit">
-                            <div className="p-2 rounded-lg bg-gradient-primary text-white shadow-md group-hover:scale-110 transition-transform duration-300">
-                                <Sparkles size={18} />
+        <footer className="bg-white dark:bg-secondary-900 border-t border-secondary-200 dark:border-secondary-800 pt-16 pb-8 transition-colors duration-300">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                    {/* Brand */}
+                    <div className="space-y-4">
+                        <Link to="/" className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-accent-purple flex items-center justify-center text-white font-bold text-xl">
+                                C
                             </div>
-                            <span className="font-display font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300">
-                                Content Hub
+                            <span className="font-display font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-purple dark:from-primary-400 dark:to-accent-purple">
+                                ContentHub
                             </span>
                         </Link>
-                        <p className="text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
-                            A modern platform for sharing knowledge, stories, and ideas.
-                            Join our community of creators and start your journey today.
+                        <p className="text-secondary-600 dark:text-secondary-400 text-sm leading-relaxed">
+                            Discover stories, thinking, and expertise from writers on any topic. A place where ideas find their home.
                         </p>
+                        <div className="flex gap-4">
+                            <a href="#" className="text-secondary-400 hover:text-primary-500 transition-colors">
+                                <Twitter className="w-5 h-5" />
+                            </a>
+                            <a href="#" className="text-secondary-400 hover:text-primary-500 transition-colors">
+                                <Facebook className="w-5 h-5" />
+                            </a>
+                            <a href="#" className="text-secondary-400 hover:text-primary-500 transition-colors">
+                                <Instagram className="w-5 h-5" />
+                            </a>
+                            <a href="#" className="text-secondary-400 hover:text-primary-500 transition-colors">
+                                <Linkedin className="w-5 h-5" />
+                            </a>
+                        </div>
                     </div>
 
+                    {/* Quick Links */}
                     <div>
-                        <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Platform</h3>
-                        <ul className="space-y-2">
+                        <h3 className="font-semibold text-secondary-900 dark:text-white mb-6">Explore</h3>
+                        <ul className="space-y-3">
                             <li>
-                                <Link to="/" className="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+                                <Link to="/" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
                                     Home
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/categories" className="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+                                <Link to="/categories" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
                                     Categories
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/tags" className="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
-                                    Tags
+                                <Link to="/trending" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                                    Trending
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/authors" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                                    Top Authors
                                 </Link>
                             </li>
                         </ul>
                     </div>
 
+                    {/* Legal */}
                     <div>
-                        <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect</h3>
-                        <div className="flex gap-4">
-                            <a href="#" className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white transition-all hover:-translate-y-1">
-                                <Github size={20} />
-                            </a>
-                            <a href="#" className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white transition-all hover:-translate-y-1">
-                                <Twitter size={20} />
-                            </a>
-                            <a href="#" className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white transition-all hover:-translate-y-1">
-                                <Linkedin size={20} />
-                            </a>
-                        </div>
+                        <h3 className="font-semibold text-secondary-900 dark:text-white mb-6">Legal</h3>
+                        <ul className="space-y-3">
+                            <li>
+                                <Link to="/privacy" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                                    Privacy Policy
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/terms" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                                    Terms of Service
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/cookies" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                                    Cookie Policy
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Newsletter */}
+                    <div>
+                        <h3 className="font-semibold text-secondary-900 dark:text-white mb-6">Newsletter</h3>
+                        <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-4">
+                            Subscribe to our newsletter to get the latest updates.
+                        </p>
+                        <form className="space-y-3">
+                            <div className="relative">
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    className="w-full bg-secondary-50 dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-lg py-2 px-4 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none dark:text-white transition-colors"
+                                />
+                                <Mail className="absolute right-3 top-2.5 w-4 h-4 text-secondary-400" />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors shadow-md hover:shadow-lg"
+                            >
+                                Subscribe
+                            </button>
+                        </form>
                     </div>
                 </div>
 
-                <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-slate-500 dark:text-slate-500">
-                        © {currentYear} Content Hub. All rights reserved.
+                <div className="border-t border-secondary-200 dark:border-secondary-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                        © {currentYear} ContentHub. All rights reserved.
                     </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-500 flex items-center gap-1">
-                        Made with <Heart size={14} className="text-red-500 fill-red-500 animate-pulse" /> by DevTeam
+                    <p className="text-sm text-secondary-500 dark:text-secondary-400 flex items-center gap-1">
+                        Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by DevTiro
                     </p>
                 </div>
             </div>
