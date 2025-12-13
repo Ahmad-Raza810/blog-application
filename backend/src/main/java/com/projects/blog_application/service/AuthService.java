@@ -1,9 +1,7 @@
 package com.projects.blog_application.service;
 
-import com.projects.blog_application.domain.dtos.LoginResponseDTO;
-import com.projects.blog_application.domain.dtos.LoginRequestDTO;
-import com.projects.blog_application.domain.dtos.RegisterRequestDTO;
-import com.projects.blog_application.domain.dtos.RegisterResponseDTO;
+import com.projects.blog_application.domain.dtos.*;
+import org.springframework.security.core.Authentication;
 
 
 public interface AuthService {
@@ -12,6 +10,8 @@ public interface AuthService {
     LoginResponseDTO login(LoginRequestDTO requestDTO);
 
     RegisterResponseDTO register(RegisterRequestDTO registerRequestDTO);
+
+    String logout(Authentication authentication);
 
 
 

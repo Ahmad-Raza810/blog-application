@@ -1,14 +1,12 @@
 package com.projects.blog_application.service.Impl;
 
 import com.projects.blog_application.domain.Roles;
-import com.projects.blog_application.domain.dtos.LoginResponseDTO;
-import com.projects.blog_application.domain.dtos.LoginRequestDTO;
-import com.projects.blog_application.domain.dtos.RegisterRequestDTO;
-import com.projects.blog_application.domain.dtos.RegisterResponseDTO;
+import com.projects.blog_application.domain.dtos.*;
 import com.projects.blog_application.domain.entities.RefreshToken;
 import com.projects.blog_application.domain.entities.User;
 import com.projects.blog_application.exception.UserAlreadyExistsException;
 import com.projects.blog_application.mapper.UserMapper;
+import com.projects.blog_application.repositories.RefreshTokenRepository;
 import com.projects.blog_application.repositories.UserRepository;
 import com.projects.blog_application.security.CustomUserDetails;
 import com.projects.blog_application.security.JwtUtil;
@@ -32,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenServiceImpl refreshTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
 
     //service method for login a user
@@ -70,6 +69,16 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setUserRole(Roles.USER);
         return userMapper.toDto(userRepository.save(user));
+    }
+
+    @Override
+    public String logout(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "you are already logged out or not authenticated ";
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        refreshTokenRepository.deleteByUserId(userDetails.getUser().getId());
+        return "refresh token deleted,successfully log out.";
     }
 
 

@@ -48,7 +48,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/v1/tags/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/tags/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
+
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/login","/api/v1/auth/register").permitAll()
                 .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/user").authenticated()
 

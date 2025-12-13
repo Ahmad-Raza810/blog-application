@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -64,5 +65,18 @@ public class AuthController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponseDTO> logout(Authentication authentication){
+        String response=authService.logout(authentication);
+
+        if(!response.equals("refresh token deleted,successfully log out."))
+            return  new ResponseEntity<>(new LogoutResponseDTO(response),HttpStatus.BAD_REQUEST);
+        else
+            return  new ResponseEntity<>(new LogoutResponseDTO(response),HttpStatus.OK);
+
+    }
+
+
 
 }
