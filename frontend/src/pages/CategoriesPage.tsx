@@ -105,7 +105,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
                 base: "h-12",
                 mainWrapper: "h-full",
                 input: "text-small",
-                inputWrapper: "h-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 transition-colors shadow-sm ring-0"
+                inputWrapper: "h-full bg-white/30 dark:bg-slate-800/30 backdrop-blur-md border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 transition-colors shadow-sm ring-0"
               }}
               radius="lg"
             />
@@ -116,7 +116,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <Card key={i} className="h-64 animate-pulse bg-white/50 dark:bg-slate-800/50 border border-white/20 shadow-none" radius="lg">
+              <Card key={i} className="h-64 animate-pulse bg-white/30 dark:bg-slate-800/30 border border-white/20 shadow-none" radius="lg">
                 <div className="h-full w-full bg-default-200/50" />
               </Card>
             ))}
@@ -156,7 +156,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
               return (
                 <motion.div key={category.id} variants={item}>
                   <Card
-                    className="group h-full border border-white/40 dark:border-slate-700/40 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
+                    className="group h-full border border-white/20 dark:border-slate-700/40 bg-white/30 dark:bg-slate-800/30 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
                     isPressable
                     radius="lg"
                   >
