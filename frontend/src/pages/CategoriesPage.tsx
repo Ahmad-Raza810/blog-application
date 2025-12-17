@@ -11,7 +11,7 @@ import {
   ModalFooter,
   useDisclosure
 } from '@nextui-org/react';
-import { BookOpen, Search, ArrowRight, Sparkles, Hash, TrendingUp, Plus, Trash2, X } from 'lucide-react';
+import { BookOpen, Search, ArrowRight, Sparkles, Hash, TrendingUp, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
 import { apiService, Category, extractErrorMessage } from '../services/apiService';
 import { useAuth } from '../components/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,13 +31,16 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Create Category State
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen: isCreateOpen, onOpen: onCreateOpen, onOpenChange: onCreateChange } = useDisclosure();
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
   // Delete Category State
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteChange } = useDisclosure();
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -56,7 +59,22 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
   };
 
   const handleCreateCategory = async (onClose: () => void) => {
-    if (!newCategoryName.trim()) return;
+    // Backend Validation Rules
+    // 1. NotBlank
+    if (!newCategoryName.trim()) {
+      setCreateError("Name is required.");
+      return;
+    }
+    // 2. Size(min = 2, max = 50)
+    if (newCategoryName.length < 2 || newCategoryName.length > 50) {
+      setCreateError("Length of name should be between 2 and 50 characters.");
+      return;
+    }
+    // 3. Pattern(regexp = "^[a-zA-Z0-9\\-\\s]+$")
+    if (!/^[a-zA-Z0-9\-\s]+$/.test(newCategoryName)) {
+      setCreateError("Only letters, numbers, spaces and hyphens are allowed");
+      return;
+    }
 
     try {
       setCreating(true);
@@ -72,18 +90,30 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
     }
   };
 
-  const handleDeleteCategory = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
+  const initiateDelete = (category: Category, e: React.MouseEvent) => {
+    // Stop propagation to prevent Card press event
+    e.stopPropagation();
+    e.preventDefault();
+    setCategoryToDelete(category);
+    setDeleteError(null); // Clear previous errors
+    onDeleteOpen();
+  };
+
+  const confirmDelete = async (onClose: () => void) => {
+    if (!categoryToDelete) return;
 
     try {
-      setDeletingId(id);
-      await apiService.deleteCategory(id);
-      setCategories(categories.filter(c => c.id !== id));
+      setDeleting(true);
+      setDeleteError(null);
+      await apiService.deleteCategory(categoryToDelete.id);
+      setCategories(categories.filter(c => c.id !== categoryToDelete.id));
+      onClose();
     } catch (err) {
-      alert(extractErrorMessage(err, 'Failed to delete category'));
+      // alert(extractErrorMessage(err, 'Failed to delete category')); // Removed alert
+      setDeleteError(extractErrorMessage(err, 'Failed to delete category'));
     } finally {
-      setDeletingId(null);
+      setDeleting(false);
+      // setCategoryToDelete(null); // Keep category selected in case of error retry, close will clear it via onClose or we handle it
     }
   };
 
@@ -169,7 +199,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
               <Button
                 endContent={<Plus size={18} />}
                 className="w-full bg-primary-600 text-white shadow-lg shadow-primary/20"
-                onPress={onOpen}
+                onPress={onCreateOpen}
               >
                 Create Category
               </Button>
@@ -241,15 +271,12 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
                             </h3>
                             {isAdmin && (
                               <div
-                                onClick={(e) => handleDeleteCategory(category.id, e)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full text-red-500"
+                                onClick={(e) => initiateDelete(category, e)}
+                                onMouseDown={(e) => e.stopPropagation()} // Extra safety against press events
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full text-red-500 z-20 cursor-pointer"
                                 title="Delete Category"
                               >
-                                {deletingId === category.id ? (
-                                  <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                  <Trash2 size={20} />
-                                )}
+                                <Trash2 size={20} />
                               </div>
                             )}
                           </div>
@@ -284,7 +311,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
       </motion.div>
 
       {/* Create Category Modal */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur" classNames={{
+      <Modal isOpen={isCreateOpen} onOpenChange={onCreateChange} backdrop="blur" classNames={{
         base: "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-white/20 dark:border-slate-700/50 shadow-xl",
         header: "border-b border-slate-200 dark:border-slate-800",
         footer: "border-t border-slate-200 dark:border-slate-800",
@@ -317,6 +344,49 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
                   isDisabled={!newCategoryName.trim()}
                 >
                   Create
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteChange} backdrop="blur" classNames={{
+        base: "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-white/20 dark:border-slate-700/50 shadow-xl",
+        header: "border-b border-slate-200 dark:border-slate-800",
+        footer: "border-t border-slate-200 dark:border-slate-800",
+      }}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex items-center gap-2 text-slate-800 dark:text-white">
+                <AlertTriangle className="text-red-500" size={24} />
+                Confirm Deletion
+              </ModalHeader>
+              <ModalBody className="py-6">
+                <p className="text-slate-600 dark:text-slate-400">
+                  Are you sure you want to delete the category <span className="font-bold text-slate-800 dark:text-slate-200">"{categoryToDelete?.name}"</span>?
+                  This action cannot be undone.
+                </p>
+                {/* Error Message Display */}
+                {deleteError && (
+                  <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2 text-red-600 dark:text-red-400 text-sm">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                    <p>{deleteError}</p>
+                  </div>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color="danger"
+                  onPress={() => confirmDelete(onClose)}
+                  isLoading={deleting}
+                >
+                  Delete
                 </Button>
               </ModalFooter>
             </>
