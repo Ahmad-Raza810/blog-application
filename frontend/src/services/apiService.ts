@@ -31,6 +31,7 @@ export interface UserProfile {
   avatar?: string;
   createdAt?: string;
   updatedAt?: string;
+  userRole?: 'USER' | 'ADMIN';
   // Add more fields as available from backend
 }
 
@@ -239,8 +240,8 @@ class ApiService {
 
 
   public async createCategory(name: string): Promise<Category> {
-    const response: AxiosResponse<Category> = await this.api.post('/categories', { name });
-    return response.data;
+    const response: AxiosResponse<{ message: string; data: Category; status: number; success: boolean; dateTime: string }> = await this.api.post('/categories', { name });
+    return response.data.data;
   }
 
   public async updateCategory(id: string, name: string): Promise<Category> {

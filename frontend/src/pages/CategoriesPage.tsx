@@ -1,8 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardBody, Input } from '@nextui-org/react';
-import { BookOpen, Search, ArrowRight, Sparkles, Hash, TrendingUp } from 'lucide-react';
+import {
+  Card,
+  CardBody,
+  Input,
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure
+} from '@nextui-org/react';
+import { BookOpen, Search, ArrowRight, Sparkles, Hash, TrendingUp, Plus, Trash2, X } from 'lucide-react';
 import { apiService, Category, extractErrorMessage } from '../services/apiService';
-import { motion } from 'framer-motion';
+import { useAuth } from '../components/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants, container, item } from '../utils/animation-utils';
 
 interface CategoriesPageProps {
@@ -10,26 +22,70 @@ interface CategoriesPageProps {
 }
 
 const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.userRole === 'ADMIN';
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        const data = await apiService.getCategories();
-        setCategories(data);
-      } catch (err) {
-        setError(extractErrorMessage(err, 'Failed to load categories'));
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Create Category State
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
+  // Delete Category State
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
     fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getCategories();
+      setCategories(data);
+    } catch (err) {
+      setError(extractErrorMessage(err, 'Failed to load categories'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateCategory = async (onClose: () => void) => {
+    if (!newCategoryName.trim()) return;
+
+    try {
+      setCreating(true);
+      setCreateError(null);
+      const newCategory = await apiService.createCategory(newCategoryName);
+      setCategories([...categories, newCategory]);
+      setNewCategoryName("");
+      onClose();
+    } catch (err) {
+      setCreateError(extractErrorMessage(err, 'Failed to create category'));
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    if (!window.confirm('Are you sure you want to delete this category?')) return;
+
+    try {
+      setDeletingId(id);
+      await apiService.deleteCategory(id);
+      setCategories(categories.filter(c => c.id !== id));
+    } catch (err) {
+      alert(extractErrorMessage(err, 'Failed to delete category'));
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -94,7 +150,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
-            className="w-full md:w-80"
+            className="w-full md:w-80 flex flex-col gap-4"
           >
             <Input
               placeholder="Search categories..."
@@ -109,6 +165,15 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
               }}
               radius="lg"
             />
+            {isAdmin && (
+              <Button
+                endContent={<Plus size={18} />}
+                className="w-full bg-primary-600 text-white shadow-lg shadow-primary/20"
+                onPress={onOpen}
+              >
+                Create Category
+              </Button>
+            )}
           </motion.div>
         </div>
 
@@ -170,9 +235,24 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
                             <BookOpen className={`w-7 h-7 ${textColor}`} />
                           </div>
 
-                          <h3 className="text-2xl font-bold mb-3 text-slate-800 dark:text-white group-hover:text-primary transition-colors">
-                            {category.name}
-                          </h3>
+                          <div className="flex justify-between items-start">
+                            <h3 className="text-2xl font-bold mb-3 text-slate-800 dark:text-white group-hover:text-primary transition-colors">
+                              {category.name}
+                            </h3>
+                            {isAdmin && (
+                              <div
+                                onClick={(e) => handleDeleteCategory(category.id, e)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full text-red-500"
+                                title="Delete Category"
+                              >
+                                {deletingId === category.id ? (
+                                  <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <Trash2 size={20} />
+                                )}
+                              </div>
+                            )}
+                          </div>
 
                           <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed line-clamp-2 mb-4">
                             Discover latest articles and insights about {category.name}.
@@ -202,6 +282,47 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
           </motion.div>
         )}
       </motion.div>
+
+      {/* Create Category Modal */}
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur" classNames={{
+        base: "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-white/20 dark:border-slate-700/50 shadow-xl",
+        header: "border-b border-slate-200 dark:border-slate-800",
+        footer: "border-t border-slate-200 dark:border-slate-800",
+      }}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 text-slate-800 dark:text-white">Create New Category</ModalHeader>
+              <ModalBody className="py-6">
+                <Input
+                  autoFocus
+                  label="Category Name"
+                  placeholder="Enter category name"
+                  variant="bordered"
+                  value={newCategoryName}
+                  onValueChange={setNewCategoryName}
+                />
+                {createError && (
+                  <p className="text-red-500 text-sm mt-2">{createError}</p>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  onPress={() => handleCreateCategory(onClose)}
+                  isLoading={creating}
+                  isDisabled={!newCategoryName.trim()}
+                >
+                  Create
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 };
