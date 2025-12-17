@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public interface CommentService {
     List<Comment> getCommentsByPost(UUID postId);
+    Comment createComment(UUID postId, String content);
     void deleteComment(UUID commentId);
 }
