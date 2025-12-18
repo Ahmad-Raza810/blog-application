@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@nextui-org/react';
 import { Sparkles, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -22,8 +22,9 @@ const HomePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("createdAt,desc");
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
-  const [selectedTag, setSelectedTag] = useState<string | undefined>(undefined);
+  const [searchParams] = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(searchParams.get('category') || undefined);
+  const [selectedTag, setSelectedTag] = useState<string | undefined>(searchParams.get('tag') || undefined);
 
   useEffect(() => {
     const fetchData = async () => {
