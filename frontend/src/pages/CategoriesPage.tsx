@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardBody,
@@ -22,6 +23,7 @@ interface CategoriesPageProps {
 }
 
 const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user?.userRole === 'ADMIN';
 
@@ -253,6 +255,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
                   <Card
                     className="group h-full border border-white/20 dark:border-slate-700/60 bg-white/30 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
                     isPressable
+                    onPress={() => navigate(`/?category=${category.id}`)}
                     radius="lg"
                   >
                     <CardBody className="p-6 h-full relative cursor-pointer">
@@ -292,7 +295,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
                               <Hash size={14} />
                             </span>
                             <span className="font-medium text-sm">
-                              {category.postCount} {category.postCount === 1 ? 'Article' : 'Articles'}
+                              {category.publishedPostCount ?? category.postCount} {(category.publishedPostCount ?? category.postCount) === 1 ? 'Article' : 'Articles'}
                             </span>
                           </div>
 
