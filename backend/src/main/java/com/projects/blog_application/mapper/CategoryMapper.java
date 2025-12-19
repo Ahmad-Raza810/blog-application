@@ -25,10 +25,11 @@ public interface CategoryMapper {
 
     @Named("calculatePostCount")
     default long calculatePostCount(List<Post> posts) {
-        if (posts == null)
+        if (posts == null || posts.isEmpty())
             return 0;
         else
-            return posts.size();
+            return posts.stream()
+                    .filter(post -> PostStatus.PUBLISHED.equals(post.getPostStatus())).count();
     }
 
 }
