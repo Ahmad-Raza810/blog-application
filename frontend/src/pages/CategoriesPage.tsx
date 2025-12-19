@@ -295,7 +295,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
                               <Hash size={14} />
                             </span>
                             <span className="font-medium text-sm">
-                              {category.publishedPostCount ?? category.postCount} {(category.publishedPostCount ?? category.postCount) === 1 ? 'Article' : 'Articles'}
+                              {category.postCount} {category.postCount === 1 ? 'Article' : 'Articles'}
                             </span>
                           </div>
 

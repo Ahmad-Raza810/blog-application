@@ -39,7 +39,6 @@ export interface Category {
   id: string;
   name: string;
   postCount?: number;
-  publishedPostCount?: number;
 }
 
 export interface Tag {
