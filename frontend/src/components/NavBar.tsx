@@ -4,8 +4,14 @@ import { useAuth } from './AuthContext';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { useTheme } from '../hooks/useTheme';
-import { Menu, X, Search, Sun, Moon, User, LogOut, PenTool } from 'lucide-react';
+import { Menu, X, Search, Sun, Moon, User, LogOut, PenTool, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+type NavLink = {
+  name: string;
+  path?: string;
+  children?: { name: string; path: string }[];
+};
 
 const NavBar = () => {
   const { user, logout } = useAuth();
@@ -14,6 +20,7 @@ const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +30,26 @@ const NavBar = () => {
     }
   };
 
-  const navLinks = [
+  const navLinks: NavLink[] = [
     { name: 'Home', path: '/' },
-    { name: 'Categories', path: '/categories' },
+    { name: 'Blogs', path: '/blogs' },
+    {
+      name: 'Explore',
+      children: [
+        { name: 'Categories', path: '/categories' },
+        { name: 'Tags', path: '/tags' },
+      ]
+    },
     { name: 'About', path: '/about' },
   ];
+
+  const handleDropdownEnter = (name: string) => {
+    setActiveDropdown(name);
+  };
+
+  const handleDropdownLeave = () => {
+    setActiveDropdown(null);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-secondary-900/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-800 transition-all duration-300">
@@ -46,16 +68,51 @@ const NavBar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <Link
+              <div
                 key={link.name}
-                to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-primary-600 dark:hover:text-primary-400 ${location.pathname === link.path
-                    ? 'text-primary-600 dark:text-primary-400'
-                    : 'text-secondary-600 dark:text-secondary-300'
-                  }`}
+                className="relative group"
+                onMouseEnter={() => link.children && handleDropdownEnter(link.name)}
+                onMouseLeave={handleDropdownLeave}
               >
-                {link.name}
-              </Link>
+                {link.path ? (
+                  <Link
+                    to={link.path}
+                    className={`text-sm font-medium transition-colors hover:text-primary-600 dark:hover:text-primary-400 ${location.pathname === link.path
+                      ? 'text-primary-600 dark:text-primary-400'
+                      : 'text-secondary-600 dark:text-secondary-300'
+                      }`}
+                  >
+                    {link.name}
+                  </Link>
+                ) : (
+                  <button
+                    className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-600 dark:hover:text-primary-400 ${activeDropdown === link.name
+                      ? 'text-primary-600 dark:text-primary-400'
+                      : 'text-secondary-600 dark:text-secondary-300'
+                      }`}
+                  >
+                    {link.name}
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === link.name ? 'rotate-180' : ''}`} />
+                  </button>
+                )}
+
+                {/* Desktop Dropdown */}
+                {link.children && (
+                  <div
+                    className={`absolute top-full left-0 mt-2 w-48 bg-white dark:bg-secondary-800 rounded-xl shadow-lg border border-secondary-100 dark:border-secondary-700 py-2 transition-all duration-200 origin-top-left ${activeDropdown === link.name ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}
+                  >
+                    {link.children.map((child) => (
+                      <Link
+                        key={child.name}
+                        to={child.path}
+                        className="block px-4 py-2 text-sm text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700"
+                      >
+                        {child.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
 
             {/* Search Bar - Desktop */}
@@ -100,7 +157,7 @@ const NavBar = () => {
                       </div>
                     </div>
                   </button>
-                  {/* Dropdown Menu */}
+                  {/* User Dropdown Menu */}
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-secondary-800 rounded-xl shadow-lg border border-secondary-100 dark:border-secondary-700 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
                     <div className="px-4 py-2 border-b border-secondary-100 dark:border-secondary-700">
                       <p className="text-sm font-medium text-secondary-900 dark:text-white truncate">{user.name}</p>
@@ -108,6 +165,9 @@ const NavBar = () => {
                     </div>
                     <Link to="/profile" className="block px-4 py-2 text-sm text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700">
                       Profile
+                    </Link>
+                    <Link to="/posts/drafts" className="block px-4 py-2 text-sm text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700">
+                      My Drafts
                     </Link>
                     <Link to="/saved" className="block px-4 py-2 text-sm text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700">
                       Saved Posts
@@ -173,17 +233,41 @@ const NavBar = () => {
               </form>
               <div className="flex flex-col space-y-2">
                 {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    to={link.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium ${location.pathname === link.path
-                        ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
-                        : 'text-secondary-600 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800'
-                      }`}
-                  >
-                    {link.name}
-                  </Link>
+                  <div key={link.name}>
+                    {link.path ? (
+                      <Link
+                        to={link.path}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block px-3 py-2 rounded-lg text-sm font-medium ${location.pathname === link.path
+                          ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+                          : 'text-secondary-600 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800'
+                          }`}
+                      >
+                        {link.name}
+                      </Link>
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="px-3 py-2 text-sm font-medium text-secondary-900 dark:text-white">
+                          {link.name}
+                        </div>
+                        <div className="pl-4 space-y-1 border-l-2 border-secondary-100 dark:border-secondary-800 ml-3">
+                          {link.children?.map((child) => (
+                            <Link
+                              key={child.name}
+                              to={child.path}
+                              onClick={() => setIsMenuOpen(false)}
+                              className={`block px-3 py-2 rounded-lg text-sm font-medium ${location.pathname === child.path
+                                ? 'text-primary-600 dark:text-primary-400'
+                                : 'text-secondary-600 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800'
+                                }`}
+                            >
+                              {child.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
               <div className="pt-4 border-t border-secondary-200 dark:border-secondary-800">

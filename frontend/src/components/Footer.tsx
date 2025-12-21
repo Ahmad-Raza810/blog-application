@@ -58,6 +58,11 @@ const Footer = () => {
                                 </Link>
                             </li>
                             <li>
+                                <Link to="/tags" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                                    Tags
+                                </Link>
+                            </li>
+                            <li>
                                 <Link to="/authors" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
                                     Top Authors
                                 </Link>
