@@ -25,4 +25,6 @@ public interface PostService {
     List<Post> getAllPostByUserId(UUID userid);
 
     List<Post> getFeaturedPost();
+
+    List<Post> getTrendingPosts();
 }

@@ -187,4 +187,26 @@ public class PostController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    //api endpoint for getting trending post
+    @GetMapping("/trending")
+    public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getTrendingPosts() {
+        List<Post> trendingPosts = postService.getTrendingPosts();
+
+        List<PostResponseDTO> trendingPostDtos = trendingPosts
+                .stream()
+                .map(postMapper::toDto)
+                .toList();
+
+        ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
+                "Trending Posts fetched successfully.",
+                trendingPostDtos,
+                HttpStatus.OK.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }
