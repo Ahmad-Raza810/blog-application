@@ -8,6 +8,7 @@ import PostPage from "./pages/PostPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import TagsPage from "./pages/TagsPage";
 import DraftsPage from "./pages/DraftsPage";
+import TrendingPage from "./pages/TrendingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -35,7 +36,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function AppContent() {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <BrowserRouter>
@@ -45,6 +46,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/blogs" element={<BlogsPage />} />
+            <Route path="/trending" element={<TrendingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/posts/:id" element={<PostPage />} />
