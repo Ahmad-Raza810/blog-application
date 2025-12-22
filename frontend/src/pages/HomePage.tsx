@@ -17,6 +17,8 @@ import 'swiper/css/navigation';
 const HomePage: React.FC = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState<Post[] | null>(null);
+  const [featuredPosts, setFeaturedPosts] = useState<Post[]>([]);
+  const [trendingPosts, setTrendingPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,13 +27,17 @@ const HomePage: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [postsResponse, categoriesResponse] = await Promise.all([
+        const [postsResponse, categoriesResponse, featuredResponse, trendingResponse] = await Promise.all([
           apiService.getPosts({}),
           apiService.getCategories(),
+          apiService.getFeaturedPosts(),
+          apiService.getTrendingPosts(),
         ]);
 
         setPosts(postsResponse);
         setCategories(categoriesResponse);
+        setFeaturedPosts(featuredResponse);
+        setTrendingPosts(trendingResponse);
         setError(null);
       } catch (err) {
         setError(extractErrorMessage(err, 'Failed to load content.'));
@@ -43,10 +49,10 @@ const HomePage: React.FC = () => {
     fetchData();
   }, []);
 
-  // Mocking sections based on available data
-  const featuredPosts = posts ? posts.slice(0, 3) : []; // First 3 as featured
-  const trendingPosts = posts ? [...posts].sort(() => 0.5 - Math.random()).slice(0, 5) : []; // Random 5 as trending mockup
-  const latestPosts = posts ? posts.slice(0, 6) : []; // First 6 recent posts
+  // Derived data
+  const latestPosts = posts
+    ? [...posts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 6)
+    : []; // First 6 recent posts
   const topCategories = categories.slice(0, 4); // First 4 categories
 
   return (
@@ -123,7 +129,12 @@ const HomePage: React.FC = () => {
               768: { slidesPerView: 2 },
               1200: { slidesPerView: 3 },
             }}
-            autoplay={{ delay: 6000 }}
+            loop={true}
+            autoplay={{
+              delay: 3000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true
+            }}
             pagination={{ clickable: true }}
             className="pb-12"
           >
@@ -173,23 +184,38 @@ const HomePage: React.FC = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {topCategories.map((category) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {topCategories.map((category, index) => (
             <Link key={category.id} to={`/categories?id=${category.id}`}>
               <Card
                 isPressable
-                className="w-full h-32 bg-gradient-to-br from-white to-secondary-50 dark:from-secondary-800 dark:to-secondary-900 border border-secondary-200 dark:border-secondary-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all shadow-sm hover:shadow-md group"
+                className="w-full h-auto aspect-[4/3] bg-white dark:bg-secondary-800/50 border border-transparent hover:border-primary-500/30 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 group overflow-visible"
               >
-                <CardBody className="flex flex-col items-center justify-center p-4">
-                  <div className="p-3 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-600 mb-2 group-hover:scale-110 transition-transform">
-                    <BookOpen size={20} />
+                <CardBody className="flex flex-col items-start justify-between p-6 h-full relative overflow-hidden">
+                  {/* Decorative background element */}
+                  <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full opacity-10 bg-gradient-to-br ${index % 4 === 0 ? 'from-purple-500 to-blue-500' :
+                    index % 4 === 1 ? 'from-pink-500 to-rose-500' :
+                      index % 4 === 2 ? 'from-amber-400 to-orange-500' :
+                        'from-emerald-400 to-teal-500'
+                    } blur-xl group-hover:opacity-20 transition-opacity`} />
+
+                  <div className={`p-3 rounded-2xl ${index % 4 === 0 ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' :
+                    index % 4 === 1 ? 'bg-pink-50 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' :
+                      index % 4 === 2 ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' :
+                        'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+                    } mb-4 group-hover:scale-110 transition-transform origin-left`}>
+                    <BookOpen size={24} strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-white group-hover:text-primary-600 transition-colors">
-                    {category.name}
-                  </h3>
-                  <span className="text-xs text-secondary-500 mt-1">
-                    {category.postCount ? `${category.postCount} Posts` : 'Explore'}
-                  </span>
+
+                  <div>
+                    <h3 className="text-xl font-bold text-secondary-900 dark:text-white mb-1 leading-tight group-hover:text-primary-600 transition-colors">
+                      {category.name}
+                    </h3>
+                    <div className="flex items-center gap-2 text-sm text-secondary-500 font-medium">
+                      <span>{category.postCount || 0} Articles</span>
+                      <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </div>
+                  </div>
                 </CardBody>
               </Card>
             </Link>
@@ -207,16 +233,16 @@ const HomePage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col divide-y divide-secondary-100 dark:divide-secondary-800">
             {loading ? (
               [1, 2, 3].map((n) => (
-                <div key={n} className="h-40 w-full bg-secondary-100 dark:bg-secondary-800 rounded-2xl animate-pulse" />
+                <div key={n} className="h-40 w-full bg-secondary-100 dark:bg-secondary-800 animate-pulse my-4 rounded-xl" />
               ))
             ) : latestPosts.map((post) => (
               <Link key={post.id} to={`/posts/${post.id}`}>
                 <motion.div
                   variants={item}
-                  className="group flex flex-col sm:flex-row gap-6 p-4 rounded-2xl hover:bg-secondary-50 dark:hover:bg-secondary-800/50 transition-colors border border-transparent hover:border-secondary-100 dark:hover:border-secondary-700"
+                  className="group flex flex-col sm:flex-row gap-6 p-6 hover:bg-secondary-50 dark:hover:bg-secondary-800/50 transition-colors"
                 >
                   <div className="w-full sm:w-48 h-32 rounded-xl overflow-hidden flex-shrink-0">
                     <img

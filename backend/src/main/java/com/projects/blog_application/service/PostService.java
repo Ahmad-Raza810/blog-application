@@ -23,4 +23,8 @@ public interface PostService {
     void deletePost(UUID postId,UUID userId);
 
     List<Post> getAllPostByUserId(UUID userid);
+
+    List<Post> getFeaturedPost();
+
+    List<Post> getTrendingPosts();
 }

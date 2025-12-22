@@ -18,10 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -159,5 +156,21 @@ public class PostServiceImpl implements PostService {
         User author = userService.getUserById(userid);
         return postRepository.findAllByAuthor(author);
     }
+
+    //service method for return featured post
+    @Override
+    public List<Post> getFeaturedPost() {
+        return postRepository.findTop5ByIsFeaturedTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
+    }
+
+
+    //service method which  return trending posts
+    @Override
+    public List<Post> getTrendingPosts() {
+        List<Post> trendingPosts=postRepository.findTByIsTrendingTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
+        Collections.shuffle(trendingPosts);
+        return trendingPosts.stream().limit(5).toList();
+    }
+
 
 }

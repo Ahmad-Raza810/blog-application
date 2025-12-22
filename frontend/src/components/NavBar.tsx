@@ -37,6 +37,7 @@ const NavBar = () => {
       name: 'Explore',
       children: [
         { name: 'Categories', path: '/categories' },
+        { name: 'Trending', path: '/trending' },
         { name: 'Tags', path: '/tags' },
       ]
     },

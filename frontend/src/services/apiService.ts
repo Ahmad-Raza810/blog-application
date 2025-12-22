@@ -231,6 +231,18 @@ class ApiService {
     return response.data.data; // <-- only the posts array
   }
 
+  public async getFeaturedPosts(): Promise<Post[]> {
+    const response: AxiosResponse<{ message: string; data: Post[]; status: number; success: boolean; dateTime: string }> =
+      await this.api.get('/posts/featured');
+    return response.data.data;
+  }
+
+  public async getTrendingPosts(): Promise<Post[]> {
+    const response: AxiosResponse<{ message: string; data: Post[]; status: number; success: boolean; dateTime: string }> =
+      await this.api.get('/posts/trending');
+    return response.data.data;
+  }
+
 
   //category
   public async getCategories(): Promise<Category[]> {
