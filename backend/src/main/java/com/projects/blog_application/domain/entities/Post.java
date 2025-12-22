@@ -45,6 +45,8 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private PostStatus postStatus;
 
+    private boolean isFeatured;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id",nullable = false)
     private Category category;

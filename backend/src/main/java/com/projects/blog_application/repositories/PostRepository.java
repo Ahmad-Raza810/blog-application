@@ -24,4 +24,4 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     List<Post> findAllByAuthor(User user);
 
-}
+    List<Post> findTop5ByIsFeaturedTrueAndPostStatusOrderByCreatedAtDesc(PostStatus postStatus);}
