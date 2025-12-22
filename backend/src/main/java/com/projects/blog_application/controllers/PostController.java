@@ -165,4 +165,26 @@ public class PostController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    //api endpoint for getting featured post
+    @GetMapping("/featured")
+    public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getFeaturedPosts() {
+        List<Post> featuredPost = postService.getFeaturedPost();
+
+        List<PostResponseDTO> featuredPostDtos = featuredPost
+                .stream()
+                .map(postMapper::toDto)
+                .toList();
+
+        ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
+                "Featured Posts fetched successfully.",
+                featuredPostDtos,
+                HttpStatus.OK.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }

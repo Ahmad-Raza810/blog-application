@@ -160,4 +160,10 @@ public class PostServiceImpl implements PostService {
         return postRepository.findAllByAuthor(author);
     }
 
+    //service method for return featured post
+    @Override
+    public List<Post> getFeaturedPost() {
+        return postRepository.findTop5ByIsFeaturedTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
+    }
+
 }
