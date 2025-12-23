@@ -1,9 +1,11 @@
 package com.projects.blog_application.service.Impl;
 
+import com.projects.blog_application.domain.dtos.CommentResponseDTO;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.domain.entities.User;
 import com.projects.blog_application.domain.entities.Comment;
 import com.projects.blog_application.exception.ResourceNotFoundException;
+import com.projects.blog_application.mapper.CommentMapper;
 import com.projects.blog_application.repositories.PostRepository;
 import com.projects.blog_application.repositories.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +13,7 @@ import com.projects.blog_application.repositories.CommentRepository;
 import com.projects.blog_application.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,12 +25,17 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentMapper commentMapper;
 
     @Override
-    public List<Comment> getCommentsByPost(UUID postId) {
-        return commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
-    }
+    public List<CommentResponseDTO> getCommentsByPost(UUID postId) {
+        return commentRepository.findByPostIdOrderByCreatedAtAsc(postId)
+                .stream()
+                .map(commentMapper::toDto)
+                .toList();
 
+    }
+    @Transactional
     @Override
     public Comment createComment(UUID postId, String content) {
 

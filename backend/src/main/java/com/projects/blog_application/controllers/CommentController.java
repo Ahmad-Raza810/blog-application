@@ -1,4 +1,5 @@
 package com.projects.blog_application.controllers;
+import com.projects.blog_application.domain.dtos.CommentResponseDTO;
 import com.projects.blog_application.domain.dtos.CreateCommentRequest;
 import com.projects.blog_application.domain.entities.Comment;
 import com.projects.blog_application.response.ApiResponse;
@@ -20,12 +21,12 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<ApiResponse<List<Comment>>> getComments(
+    public ResponseEntity<ApiResponse<List<CommentResponseDTO>>> getComments(
             @PathVariable UUID postId
     ) {
-        List<Comment> comments = commentService.getCommentsByPost(postId);
+        List<CommentResponseDTO> comments = commentService.getCommentsByPost(postId);
 
-        ApiResponse<List<Comment>> response = ApiResponse.<List<Comment>>builder()
+        ApiResponse<List<CommentResponseDTO>> response = ApiResponse.<List<CommentResponseDTO>>builder()
                 .message("Comments fetched successfully")
                 .data(comments)
                 .status(HttpStatus.OK.value())
