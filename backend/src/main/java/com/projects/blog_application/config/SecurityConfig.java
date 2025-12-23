@@ -54,6 +54,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/user").authenticated()
 
+                .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/comments").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/**").hasAuthority("ADMIN")
+
+
 
                 .anyRequest().authenticated()
         );
