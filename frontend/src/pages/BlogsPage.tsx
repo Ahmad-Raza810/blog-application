@@ -1,148 +1,222 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Button } from '@nextui-org/react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { Card, CardBody, CardFooter, Chip, Spinner } from '@nextui-org/react';
 import { motion } from 'framer-motion';
-import { apiService, Post, Category, Tag as TagType, extractErrorMessage } from '../services/apiService';
-import PostList from '../components/PostList';
-import { pageVariants } from '../utils/animation-utils';
+import { Calendar, User, ArrowRight } from 'lucide-react';
+import { apiService, Post, extractErrorMessage } from '../services/apiService';
+import { pageVariants, fadeIn } from '../utils/animation-utils';
 
 const BlogsPage: React.FC = () => {
-    const [posts, setPosts] = useState<Post[] | null>(null);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [tags, setTags] = useState<TagType[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [sortBy, setSortBy] = useState("createdAt,desc");
-    const [searchParams] = useSearchParams();
-    const [selectedCategory, setSelectedCategory] = useState<string | undefined>(searchParams.get('category') || undefined);
-    const [selectedTag, setSelectedTag] = useState<string | undefined>(searchParams.get('tag') || undefined);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const observerRef = useRef<IntersectionObserver | null>(null);
+    const lastPostRef = useRef<HTMLDivElement | null>(null);
+
+    // Fetch posts with pagination
+    const fetchPosts = async (pageNum: number, append = false) => {
+        try {
+            if (pageNum === 0) {
+                setLoading(true);
+            } else {
+                setLoadingMore(true);
+            }
+
+            const response = await apiService.getPosts({
+                page: pageNum,
+                size: 10,
+            });
+
+            if (response && response.length > 0) {
+                setPosts(prev => append ? [...prev, ...response] : response);
+                setHasMore(response.length === 10); // If we got less than 10, no more pages
+            } else {
+                setHasMore(false);
+            }
+            setError(null);
+        } catch (err) {
+            setError(extractErrorMessage(err, 'Failed to load blogs. Please try again later.'));
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    };
+
+    // Initial load
+    useEffect(() => {
+        fetchPosts(0, false);
+    }, []);
+
+    // Intersection Observer for lazy loading
+    const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+        const target = entries[0];
+        if (target.isIntersecting && hasMore && !loadingMore) {
+            setPage(prev => prev + 1);
+        }
+    }, [hasMore, loadingMore]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const [postsResponse, categoriesResponse, tagsResponse] = await Promise.all([
-                    apiService.getPosts({
-                        categoryId: selectedCategory != undefined ? selectedCategory : undefined,
-                        tagId: selectedTag || undefined
-                    }),
-                    apiService.getCategories(),
-                    apiService.getTags()
-                ]);
+        if (observerRef.current) observerRef.current.disconnect();
 
-                setPosts(postsResponse);
-                setCategories(categoriesResponse);
-                setTags(tagsResponse);
-                setError(null);
-            } catch (err) {
-                setError(extractErrorMessage(err, 'Failed to load content. Please try again later.'));
-            } finally {
-                setLoading(false);
-            }
+        observerRef.current = new IntersectionObserver(handleObserver, {
+            root: null,
+            rootMargin: '100px',
+            threshold: 0.1,
+        });
+
+        if (lastPostRef.current) {
+            observerRef.current.observe(lastPostRef.current);
+        }
+
+        return () => {
+            if (observerRef.current) observerRef.current.disconnect();
         };
+    }, [handleObserver]);
 
-        fetchData();
-    }, [page, sortBy, selectedCategory, selectedTag]);
+    // Load more when page changes
+    useEffect(() => {
+        if (page > 0) {
+            fetchPosts(page, true);
+        }
+    }, [page]);
 
     return (
         <motion.div
-            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pb-12 pt-8"
+            className="min-h-screen py-12"
             initial="initial"
             animate="animate"
             variants={pageVariants}
         >
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">All Blogs</h1>
-                    <p className="text-secondary-600 dark:text-secondary-400">Explore our latest stories, ideas, and updates.</p>
-                </div>
+            {/* Header */}
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
+                <motion.h1
+                    className="text-4xl md:text-5xl font-bold text-secondary-900 dark:text-white mb-4"
+                    variants={fadeIn}
+                >
+                    All Blogs
+                </motion.h1>
+                <motion.p
+                    className="text-lg text-secondary-600 dark:text-secondary-400"
+                    variants={fadeIn}
+                >
+                    Explore our latest stories, ideas, and updates
+                </motion.p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Content - 2/3 width */}
-                <div className="lg:col-span-2">
-                    {/* Categories Tabs as Filters */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                        <button
-                            onClick={() => setSelectedCategory(undefined)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === undefined
-                                ? 'bg-primary text-white shadow-md'
-                                : 'bg-white dark:bg-secondary-800 text-secondary-600 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700'
-                                }`}
-                        >
-                            All
-                        </button>
-                        {categories.map((category) => (
-                            <button
-                                key={category.id}
-                                onClick={() => setSelectedCategory(category.id)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category.id
-                                    ? 'bg-primary text-white shadow-md'
-                                    : 'bg-white dark:bg-secondary-800 text-secondary-600 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700'
-                                    }`}
+            {/* Blog Posts - Centered */}
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                {loading && posts.length === 0 ? (
+                    <div className="flex justify-center items-center py-20">
+                        <Spinner size="lg" color="primary" />
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-20">
+                        <p className="text-red-600 dark:text-red-400">{error}</p>
+                    </div>
+                ) : posts.length === 0 ? (
+                    <div className="text-center py-20">
+                        <p className="text-secondary-600 dark:text-secondary-400">No blogs found.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-8">
+                        {posts.map((post, index) => (
+                            <motion.div
+                                key={post.id}
+                                ref={index === posts.length - 1 ? lastPostRef : null}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
                             >
-                                {category.name}
-                            </button>
+                                <Link to={`/posts/${post.id}`}>
+                                    <Card
+                                        isPressable
+                                        className="w-full bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300 shadow-sm hover:shadow-xl group"
+                                    >
+                                        <CardBody className="p-0">
+                                            <div className="grid md:grid-cols-3 gap-0">
+                                                {/* Image */}
+                                                <div className="md:col-span-1 h-64 md:h-auto overflow-hidden">
+                                                    <img
+                                                        src={(post as any).coverImage || `https://source.unsplash.com/random/800x600?${post.category?.name || 'blog'}`}
+                                                        alt={post.title}
+                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                        loading="lazy"
+                                                    />
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="md:col-span-2 p-6 flex flex-col justify-between">
+                                                    <div>
+                                                        {/* Category */}
+                                                        {post.category && (
+                                                            <Chip
+                                                                size="sm"
+                                                                color="primary"
+                                                                variant="flat"
+                                                                className="mb-3"
+                                                            >
+                                                                {post.category.name}
+                                                            </Chip>
+                                                        )}
+
+                                                        {/* Title */}
+                                                        <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 dark:text-white mb-3 leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                                                            {post.title}
+                                                        </h2>
+
+                                                        {/* Excerpt */}
+                                                        <p className="text-secondary-600 dark:text-secondary-400 mb-4 line-clamp-3">
+                                                            {post.content.replace(/<[^>]*>/g, '').substring(0, 200)}...
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Meta Info */}
+                                                    <div className="flex flex-wrap items-center gap-4 text-sm text-secondary-500 dark:text-secondary-400">
+                                                        <div className="flex items-center gap-2">
+                                                            <User className="w-4 h-4" />
+                                                            <span>{post.author?.name || 'Anonymous'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <Calendar className="w-4 h-4" />
+                                                            <span>{new Date(post.createdAt).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric'
+                                                            })}</span>
+                                                        </div>
+                                                        <div className="ml-auto flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium">
+                                                            Read More
+                                                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+                                </Link>
+                            </motion.div>
                         ))}
-                    </div>
 
-                    <PostList
-                        posts={posts}
-                        loading={loading}
-                        error={error}
-                        page={page}
-                        sortBy={sortBy}
-                        onPageChange={setPage}
-                        onSortChange={setSortBy}
-                    />
-                </div>
+                        {/* Loading More Indicator */}
+                        {loadingMore && (
+                            <div className="flex justify-center py-8">
+                                <Spinner size="md" color="primary" />
+                            </div>
+                        )}
 
-                {/* Sidebar - 1/3 width */}
-                <aside className="space-y-8">
-                    {/* Search Widget */}
-                    <div className="bg-white dark:bg-secondary-800 rounded-2xl p-6 shadow-sm border border-secondary-100 dark:border-secondary-700">
-                        <h3 className="text-lg font-bold text-secondary-900 dark:text-white mb-4">Search</h3>
-                        <input
-                            type="text"
-                            placeholder="Search articles..."
-                            className="w-full bg-secondary-50 dark:bg-secondary-900 border border-secondary-200 dark:border-secondary-700 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary-500"
-                        />
+                        {/* No More Posts */}
+                        {!hasMore && posts.length > 0 && (
+                            <div className="text-center py-8">
+                                <p className="text-secondary-500 dark:text-secondary-400">
+                                    You've reached the end! 🎉
+                                </p>
+                            </div>
+                        )}
                     </div>
-
-                    {/* Popular Tags */}
-                    <div className="bg-white dark:bg-secondary-800 rounded-2xl p-6 shadow-sm border border-secondary-100 dark:border-secondary-700">
-                        <h3 className="text-lg font-bold text-secondary-900 dark:text-white mb-4">Popular Tags</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {tags.map(tag => (
-                                <button
-                                    key={tag.id}
-                                    onClick={() => setSelectedTag(selectedTag === tag.id ? undefined : tag.id)}
-                                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${selectedTag === tag.id
-                                        ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                                        : 'bg-secondary-100 text-secondary-600 dark:bg-secondary-700 dark:text-secondary-300 hover:bg-secondary-200 dark:hover:bg-secondary-600'
-                                        }`}
-                                >
-                                    #{tag.name}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Newsletter Widget */}
-                    <div className="bg-gradient-to-br from-primary-500 to-accent-purple rounded-2xl p-6 text-white shadow-lg">
-                        <h3 className="text-lg font-bold mb-2">Weekly Newsletter</h3>
-                        <p className="text-white/80 text-sm mb-4">Get the best articles delivered to your inbox every week.</p>
-                        <input
-                            type="email"
-                            placeholder="Your email address"
-                            className="w-full bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-sm text-white placeholder:text-white/60 focus:ring-2 focus:ring-white mb-3"
-                        />
-                        <Button className="w-full bg-white text-primary-600 hover:bg-white/90 border-none font-semibold">
-                            Subscribe
-                        </Button>
-                    </div>
-                </aside>
+                )}
             </div>
         </motion.div>
     );
