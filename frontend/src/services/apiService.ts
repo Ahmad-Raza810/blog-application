@@ -149,7 +149,10 @@ class ApiService {
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error: AxiosError) => {
-        if (error.response?.status === 401) {
+        // Prevent redirect loop if 401 happens during login
+        const isLoginRequest = error.config?.url?.includes('/auth/login');
+
+        if (error.response?.status === 401 && !isLoginRequest) {
           localStorage.removeItem('token');
           window.location.href = '/login';
         }
