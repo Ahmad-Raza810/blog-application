@@ -85,29 +85,13 @@ const BlogsPage: React.FC = () => {
 
     return (
         <motion.div
-            className="min-h-screen py-12"
+            className="min-h-screen py-8"
             initial="initial"
             animate="animate"
             variants={pageVariants}
         >
-            {/* Header */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
-                <motion.h1
-                    className="text-4xl md:text-5xl font-bold text-secondary-900 dark:text-white mb-4"
-                    variants={fadeIn}
-                >
-                    All Blogs
-                </motion.h1>
-                <motion.p
-                    className="text-lg text-secondary-600 dark:text-secondary-400"
-                    variants={fadeIn}
-                >
-                    Explore our latest stories, ideas, and updates
-                </motion.p>
-            </div>
-
-            {/* Blog Posts - Centered */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Blog Posts - Centered and Larger */}
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                 {loading && posts.length === 0 ? (
                     <div className="flex justify-center items-center py-20">
                         <Spinner size="lg" color="primary" />
@@ -138,7 +122,7 @@ const BlogsPage: React.FC = () => {
                                         <CardBody className="p-0">
                                             <div className="grid md:grid-cols-3 gap-0">
                                                 {/* Image */}
-                                                <div className="md:col-span-1 h-64 md:h-auto overflow-hidden">
+                                                <div className="md:col-span-1 h-72 md:h-auto overflow-hidden">
                                                     <img
                                                         src={(post as any).coverImage || `https://source.unsplash.com/random/800x600?${post.category?.name || 'blog'}`}
                                                         alt={post.title}
@@ -148,7 +132,7 @@ const BlogsPage: React.FC = () => {
                                                 </div>
 
                                                 {/* Content */}
-                                                <div className="md:col-span-2 p-6 flex flex-col justify-between">
+                                                <div className="md:col-span-2 p-8 flex flex-col justify-between">
                                                     <div>
                                                         {/* Category */}
                                                         {post.category && (
@@ -156,20 +140,20 @@ const BlogsPage: React.FC = () => {
                                                                 size="sm"
                                                                 color="primary"
                                                                 variant="flat"
-                                                                className="mb-3"
+                                                                className="mb-4"
                                                             >
                                                                 {post.category.name}
                                                             </Chip>
                                                         )}
 
                                                         {/* Title */}
-                                                        <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 dark:text-white mb-3 leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                                                        <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 dark:text-white mb-4 leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                                                             {post.title}
                                                         </h2>
 
                                                         {/* Excerpt */}
-                                                        <p className="text-secondary-600 dark:text-secondary-400 mb-4 line-clamp-3">
-                                                            {post.content.replace(/<[^>]*>/g, '').substring(0, 200)}...
+                                                        <p className="text-base text-secondary-600 dark:text-secondary-400 mb-6 line-clamp-3 leading-relaxed">
+                                                            {post.content.replace(/<[^>]*>/g, '').substring(0, 250)}...
                                                         </p>
                                                     </div>
 
