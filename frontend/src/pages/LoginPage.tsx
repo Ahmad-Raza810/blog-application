@@ -16,6 +16,8 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+
     setError('');
     setIsLoading(true);
 
@@ -76,6 +78,7 @@ const LoginPage: React.FC = () => {
                 placeholder="Enter your email"
                 value={email}
                 onValueChange={setEmail}
+                isRequired
                 startContent={<Mail className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
                 variant="bordered"
                 radius="lg"
@@ -92,6 +95,7 @@ const LoginPage: React.FC = () => {
                   placeholder="Enter your password"
                   value={password}
                   onValueChange={setPassword}
+                  isRequired
                   startContent={<Lock className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
                   variant="bordered"
                   radius="lg"
@@ -111,6 +115,7 @@ const LoginPage: React.FC = () => {
                 size="lg"
                 radius="lg"
                 isLoading={isLoading}
+                isDisabled={isLoading}
                 startContent={!isLoading && <LogIn size={20} />}
               >
                 Sign In
