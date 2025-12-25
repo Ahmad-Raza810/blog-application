@@ -12,6 +12,10 @@ import TrendingPage from "./pages/TrendingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
+import AboutPage from "./pages/AboutPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import CookiePage from "./pages/CookiePage";
+import TermsPage from "./pages/TermsPage";
 import Footer from "./components/Footer";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 
@@ -47,6 +51,10 @@ function AppContent() {
             <Route path="/" element={<HomePage />} />
             <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/trending" element={<TrendingPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/cookies" element={<CookiePage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/posts/:id" element={<PostPage />} />
