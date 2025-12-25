@@ -17,6 +17,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import CookiePage from "./pages/CookiePage";
 import TermsPage from "./pages/TermsPage";
 import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 
 // Protected Route component
@@ -44,6 +45,7 @@ function AppContent() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
         <NavBar />
         <main className="flex-grow pt-16">
