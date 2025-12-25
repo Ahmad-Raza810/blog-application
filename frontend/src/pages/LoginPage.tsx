@@ -21,9 +21,14 @@ const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-      // login function in apiService handles redirect
+      // Successful login - navigate to home
+      navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to login. Please check your credentials.');
+      // Handle error - keep form values and show error message
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to login. Please check your credentials.';
+      setError(errorMessage);
+    } finally {
+      // Always reset loading state
       setIsLoading(false);
     }
   };
