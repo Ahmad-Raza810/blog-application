@@ -18,6 +18,10 @@ Whether you're looking to learn full-stack development, contribute to an open-so
 - **🎨 Modern UI**: Responsive, mobile-first design using Tailwind CSS.
 - **⚡ High Performance**: Optimized backend with JPA and fast React frontend powered by Vite.
 
+## Entity Relationships
+<img width="900" height="800" alt="Entity_Relatioships" src="https://github.com/user-attachments/assets/f4d28a7e-1581-416e-804e-fb2beed9744d" />
+
+
 ## 🛠️ Tech Stack
 
 ### Backend
