@@ -71,7 +71,10 @@ public class PostServiceImpl implements PostService {
     public Post createPost(CreatePostDTO createPostDTO, UUID userId) {
 
         User loggedInUser = userService.getUserById(userId);
-        List<Tag> tags = tagService.getTagIds(createPostDTO.getTagIds());
+        List<Tag> tags=new ArrayList<>();
+        if (!createPostDTO.getTagIds().isEmpty()) {
+            tags = tagService.getTagIds(createPostDTO.getTagIds());
+        }
         Category category = categoryService.getCategoryById(createPostDTO.getCategoryId());
 
         Post post = Post.builder()
