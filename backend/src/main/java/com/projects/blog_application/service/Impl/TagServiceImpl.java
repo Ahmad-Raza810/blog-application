@@ -95,7 +95,20 @@ public class TagServiceImpl implements TagService {
     //service method for get tags by ids
     @Override
     public List<Tag> getTagIds(Set<UUID> ids) {
-        return tagRepository.findAllById(ids);
+        List<Tag> foundTags=tagRepository.findAllById(ids);
+        if (foundTags.size()!=ids.size()) {
+
+            //get found tag ids
+            Set<UUID> foundTagIds=foundTags.stream()
+                    .map(Tag::getId)
+                    .collect(Collectors.toSet());
+
+            Set<UUID> notFoundTags=new HashSet<>(ids);
+            notFoundTags.removeAll(foundTagIds);
+
+            throw  new ResourceNotFoundException("Tags with ids "+notFoundTags+" not found");
+        }
+        return  foundTags;
     }
 
 
