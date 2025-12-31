@@ -43,9 +43,10 @@ public class CommentController {
 
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(
-            @PathVariable UUID commentId
+            @PathVariable UUID commentId,
+            @RequestAttribute("id") UUID userId
     ) {
-
+        commentService.deleteComment(commentId,userId);
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .message("Comment deleted successfully")
                 .data(null)

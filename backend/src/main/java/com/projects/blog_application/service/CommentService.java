@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface CommentService {
     List<CommentResponseDTO> getCommentsByPost(UUID postId);
     Comment createComment(UUID postId, String content);
+    void deleteComment(UUID commentId,UUID userId);
 }

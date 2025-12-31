@@ -66,5 +66,21 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.save(comment);
     }
 
+    @Override
+    @Transactional
+    public void deleteComment(UUID commentId, UUID userId) {
+        Comment comment=commentRepository.findById(commentId)
+                .orElseThrow(()->new ResourceNotFoundException("comment with id "+commentId+" not found."));
+        UUID commentAuthor=comment.getUser().getId();
+
+        User user=userRepository.findById(userId)
+                .orElseThrow(()->new ResourceNotFoundException("user with id "+userId+" not found."));
+
+        if (!(commentAuthor.equals(userId) || user.getUserRole().equals(Roles.ADMIN)))
+            throw new NotAllowedOperationException("you are not allowed to perform following operation.");
+
+        commentRepository.deleteById(commentId);
+    }
+
 
 }
