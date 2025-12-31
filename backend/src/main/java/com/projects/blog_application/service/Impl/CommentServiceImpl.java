@@ -1,9 +1,11 @@
 package com.projects.blog_application.service.Impl;
 
+import com.projects.blog_application.domain.Roles;
 import com.projects.blog_application.domain.dtos.CommentResponseDTO;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.domain.entities.User;
 import com.projects.blog_application.domain.entities.Comment;
+import com.projects.blog_application.exception.NotAllowedOperationException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.mapper.CommentMapper;
 import com.projects.blog_application.repositories.PostRepository;
@@ -65,16 +67,4 @@ public class CommentServiceImpl implements CommentService {
     }
 
 
-    @Override
-    public void deleteComment(UUID commentId) {
-
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Comment not found with id: " + commentId
-                        )
-                );
-
-        commentRepository.delete(comment);
-    }
 }

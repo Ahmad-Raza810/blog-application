@@ -45,7 +45,6 @@ public class CommentController {
     public ResponseEntity<ApiResponse<Void>> deleteComment(
             @PathVariable UUID commentId
     ) {
-        commentService.deleteComment(commentId);
 
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .message("Comment deleted successfully")
