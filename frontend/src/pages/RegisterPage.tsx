@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import { Card, CardBody, CardHeader, Input, Button, Divider } from '@nextui-org/react';
-import { User, Mail, Lock, UserPlus, ArrowRight, Sparkles } from 'lucide-react';
+import { User, Mail, Lock, UserPlus, ArrowRight, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fadeIn } from '../utils/animation-utils';
 
@@ -13,14 +13,30 @@ const RegisterPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Password Visibility State
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+
   const navigate = useNavigate();
+
+  /* Validation Logic */
+  const isNameValid = name.trim().length >= 3 && name.trim().length <= 30;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPasswordLengthValid = password.length >= 6;
+  const hasNumber = /[0-9]/.test(password);
+  const hasChar = /[a-zA-Z]/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+  const isPasswordValid = isPasswordLengthValid && hasNumber && hasChar && hasSpecial;
+  const doPasswordsMatch = password === confirmPassword && confirmPassword.length > 0;
+
+  const isFormValid = isNameValid && isEmailValid && isPasswordValid && doPasswordsMatch;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (password !== confirmPassword) {
-      setError("Passwords don't match");
+    if (!isFormValid) {
       return;
     }
 
@@ -30,10 +46,19 @@ const RegisterPage: React.FC = () => {
       await apiService.register({ name, email, password });
       navigate('/login');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to register. Please try again.');
+      if (err.response?.data?.errors) {
+        // Handle field-specific errors if needed, or just show main message
+        const errorMsg = Object.values(err.response.data.errors).join(', ');
+        setError(errorMsg);
+      } else {
+        setError(err.response?.data?.message || 'Failed to register. Please try again.');
+      }
       setIsLoading(false);
     }
   };
+
+  const togglePasswordVisibility = () => setIsPasswordVisible(!isPasswordVisible);
+  const toggleConfirmPasswordVisibility = () => setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center relative overflow-hidden px-4 py-8">
@@ -81,6 +106,8 @@ const RegisterPage: React.FC = () => {
                 startContent={<User className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
                 variant="bordered"
                 radius="lg"
+                isInvalid={name.length > 0 && !isNameValid}
+                errorMessage={name.length > 0 && !isNameValid ? "Name must be 3-30 characters" : ""}
                 classNames={{
                   inputWrapper: "bg-secondary-50/50 dark:bg-secondary-900/50 border-secondary-200 dark:border-secondary-700 hover:border-primary-500 focus-within:border-primary-500 transition-colors",
                   label: "text-secondary-600 dark:text-secondary-400"
@@ -96,36 +123,64 @@ const RegisterPage: React.FC = () => {
                 startContent={<Mail className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
                 variant="bordered"
                 radius="lg"
+                isInvalid={email.length > 0 && !isEmailValid}
+                errorMessage={email.length > 0 && !isEmailValid ? "Please enter a valid email" : ""}
                 classNames={{
                   inputWrapper: "bg-secondary-50/50 dark:bg-secondary-900/50 border-secondary-200 dark:border-secondary-700 hover:border-primary-500 focus-within:border-primary-500 transition-colors",
                   label: "text-secondary-600 dark:text-secondary-400"
                 }}
               />
 
-              <Input
-                type="password"
-                label="Password"
-                placeholder="Create a password"
-                value={password}
-                onValueChange={setPassword}
-                startContent={<Lock className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
-                variant="bordered"
-                radius="lg"
-                classNames={{
-                  inputWrapper: "bg-secondary-50/50 dark:bg-secondary-900/50 border-secondary-200 dark:border-secondary-700 hover:border-primary-500 focus-within:border-primary-500 transition-colors",
-                  label: "text-secondary-600 dark:text-secondary-400"
-                }}
-              />
+              <div>
+                <Input
+                  type={isPasswordVisible ? "text" : "password"}
+                  label="Password"
+                  placeholder="Create a password"
+                  value={password}
+                  onValueChange={setPassword}
+                  startContent={<Lock className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
+                  endContent={
+                    <button className="focus:outline-none" type="button" onClick={togglePasswordVisibility}>
+                      {isPasswordVisible ? (
+                        <EyeOff className="text-secondary-400" size={18} />
+                      ) : (
+                        <Eye className="text-secondary-400" size={18} />
+                      )}
+                    </button>
+                  }
+                  variant="bordered"
+                  radius="lg"
+                  classNames={{
+                    inputWrapper: "bg-secondary-50/50 dark:bg-secondary-900/50 border-secondary-200 dark:border-secondary-700 hover:border-primary-500 focus-within:border-primary-500 transition-colors",
+                    label: "text-secondary-600 dark:text-secondary-400"
+                  }}
+                />
+                <div className="text-xs text-secondary-400 mt-2 px-1 space-y-1">
+                  <p className={isPasswordLengthValid ? "text-green-500" : ""}>• At least 6 characters</p>
+                  <p className={hasNumber && hasChar && hasSpecial ? "text-green-500" : ""}>• Includes number, letter, and special character</p>
+                </div>
+              </div>
 
               <Input
-                type="password"
+                type={isConfirmPasswordVisible ? "text" : "password"}
                 label="Confirm Password"
                 placeholder="Confirm your password"
                 value={confirmPassword}
                 onValueChange={setConfirmPassword}
                 startContent={<Lock className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
+                endContent={
+                  <button className="focus:outline-none" type="button" onClick={toggleConfirmPasswordVisibility}>
+                    {isConfirmPasswordVisible ? (
+                      <EyeOff className="text-secondary-400" size={18} />
+                    ) : (
+                      <Eye className="text-secondary-400" size={18} />
+                    )}
+                  </button>
+                }
                 variant="bordered"
                 radius="lg"
+                isInvalid={confirmPassword.length > 0 && !doPasswordsMatch}
+                errorMessage={confirmPassword.length > 0 && !doPasswordsMatch ? "Passwords don't match" : ""}
                 classNames={{
                   inputWrapper: "bg-secondary-50/50 dark:bg-secondary-900/50 border-secondary-200 dark:border-secondary-700 hover:border-primary-500 focus-within:border-primary-500 transition-colors",
                   label: "text-secondary-600 dark:text-secondary-400"
@@ -138,6 +193,7 @@ const RegisterPage: React.FC = () => {
                 size="lg"
                 radius="lg"
                 isLoading={isLoading}
+                isDisabled={!isFormValid || isLoading}
                 startContent={!isLoading && <Sparkles size={20} />}
               >
                 Create Account
