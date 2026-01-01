@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { Card, CardBody, CardHeader, Input, Button, Divider } from '@nextui-org/react';
 import { Mail, Lock, LogIn, ArrowRight, Sparkles } from 'lucide-react';
@@ -11,8 +11,20 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Handle redirect after successful authentication
+  useEffect(() => {
+    if (isAuthenticated) {
+      const searchParams = new URLSearchParams(location.search);
+      const returnUrl = searchParams.get('returnUrl');
+      const from = returnUrl ? decodeURIComponent(returnUrl) : '/';
+      console.log('Auth state changed to authenticated. Redirecting to:', from);
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, location.search, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,15 +34,14 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
+      console.log('Starting login...');
       await login(email, password);
-      // Successful login - navigate to home
-      navigate('/');
+      console.log('Login completed successfully - waiting for auth state to update...');
+      // Don't navigate here - let the useEffect handle it after auth state updates
     } catch (err: any) {
       // Handle error - keep form values and show error message
       const errorMessage = err.response?.data?.message || err.message || 'Failed to login. Please check your credentials.';
       setError(errorMessage);
-    } finally {
-      // Always reset loading state
       setIsLoading(false);
     }
   };
