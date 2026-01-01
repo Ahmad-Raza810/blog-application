@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { apiService } from '../services/apiService';
+import { apiService, extractErrorMessage } from '../services/apiService';
 import { Card, CardBody, CardHeader, Input, Button, Divider } from '@nextui-org/react';
 import { User, Mail, Lock, UserPlus, ArrowRight, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -46,13 +46,10 @@ const RegisterPage: React.FC = () => {
       await apiService.register({ name, email, password });
       navigate('/login');
     } catch (err: any) {
-      if (err.response?.data?.errors) {
-        // Handle field-specific errors if needed, or just show main message
-        const errorMsg = Object.values(err.response.data.errors).join(', ');
-        setError(errorMsg);
-      } else {
-        setError(err.response?.data?.message || 'Failed to register. Please try again.');
-      }
+      console.error('Registration failed', err);
+      // Use helper to extract specific backend message
+      const errorMsg = extractErrorMessage(err, 'Failed to register. Please try again.');
+      setError(errorMsg);
       setIsLoading(false);
     }
   };
