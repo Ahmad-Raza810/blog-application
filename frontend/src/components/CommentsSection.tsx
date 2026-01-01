@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Textarea, Avatar, Spinner } from '@nextui-org/react';
 import { Send, Trash2, MessageCircle } from 'lucide-react';
 import { apiService, Comment, extractErrorMessage } from '../services/apiService';
@@ -16,6 +17,9 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
     const [error, setError] = useState<string | null>(null);
     const [commentText, setCommentText] = useState('');
 
+    const navigate = useNavigate();
+    const location = useLocation();
+
     useEffect(() => {
         fetchComments();
     }, [postId]);
@@ -24,11 +28,6 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
         try {
             setLoading(true);
             const data = await apiService.getPostComments(postId);
-            console.log('Fetched comments data:', data);
-            if (data.length > 0) {
-                console.log('First comment keys:', Object.keys(data[0]).join(', '));
-                console.log('First comment object:', JSON.stringify(data[0], null, 2));
-            }
             // Ensure data is array
             setComments(Array.isArray(data) ? data : []);
             setError(null);
@@ -41,6 +40,15 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
     };
 
     const handleSubmitComment = async () => {
+        if (!user) {
+            const returnUrl = encodeURIComponent(location.pathname + location.search);
+            const loginUrl = `/login?returnUrl=${returnUrl}`;
+            console.log('Redirecting to login with return URL:', loginUrl);
+            console.log('Current location:', location.pathname + location.search);
+            navigate(loginUrl);
+            return;
+        }
+
         if (!commentText.trim()) return;
 
         try {
@@ -91,52 +99,36 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
             )}
 
             {/* Add Comment Form */}
-            {user ? (
-                <div className="flex gap-4 mb-10">
-                    <Avatar
-                        src={user.avatar}
-                        name={user.name?.charAt(0)}
-                        className="flex-shrink-0"
-                        color="primary"
-                        isBordered
+            <div className="flex gap-4 mb-10">
+                <Avatar
+                    src={user?.avatar}
+                    name={user?.name?.charAt(0)}
+                    className="flex-shrink-0"
+                    color="primary"
+                    isBordered
+                />
+                <div className="flex-grow">
+                    <Textarea
+                        placeholder="What are your thoughts?"
+                        minRows={3}
+                        value={commentText}
+                        onValueChange={setCommentText}
+                        className="mb-3"
+                        variant="faded"
                     />
-                    <div className="flex-grow">
-                        <Textarea
-                            placeholder="What are your thoughts?"
-                            minRows={3}
-                            value={commentText}
-                            onValueChange={setCommentText}
-                            className="mb-3"
-                            variant="faded"
-                        />
-                        <div className="flex justify-end">
-                            <Button
-                                color="primary"
-                                isLoading={submitting}
-                                endContent={!submitting && <Send size={16} />}
-                                onPress={handleSubmitComment}
-                                isDisabled={!commentText.trim()}
-                            >
-                                Post Comment
-                            </Button>
-                        </div>
+                    <div className="flex justify-end">
+                        <Button
+                            color="primary"
+                            isLoading={submitting}
+                            endContent={!submitting && <Send size={16} />}
+                            onPress={handleSubmitComment}
+                            isDisabled={!commentText.trim()}
+                        >
+                            Post Comment
+                        </Button>
                     </div>
                 </div>
-            ) : (
-                <div className="bg-secondary-50 dark:bg-secondary-900/50 p-6 rounded-xl text-center mb-10">
-                    <p className="text-secondary-600 dark:text-secondary-400 mb-4">
-                        Log in to join the conversation and leave a comment.
-                    </p>
-                    <Button
-                        as="a"
-                        href="/login"
-                        color="primary"
-                        variant="flat"
-                    >
-                        Log In
-                    </Button>
-                </div>
-            )}
+            </div>
 
             {/* Comments List */}
             {comments.length === 0 ? (
