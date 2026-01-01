@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Pagination } from '@nextui-org/react';
-import { Calendar, Clock, ArrowRight, CornerDownRight, User } from 'lucide-react';
+import { Pagination } from '@nextui-org/react';
+import { Calendar, Clock, CornerDownRight, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Post } from '../services/apiService';
 import { motion } from 'framer-motion';
@@ -126,9 +126,7 @@ const PostList: React.FC<PostListProps> = ({
                       </span>
                     </div>
 
-                    <span className="flex items-center gap-1 text-primary-600 dark:text-primary-400 text-sm font-bold group-hover:translate-x-1 transition-transform">
-                      Read Article <ArrowRight size={16} />
-                    </span>
+
                   </div>
                 </div>
               </article>

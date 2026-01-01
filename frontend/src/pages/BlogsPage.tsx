@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardBody, Chip, Spinner, Button } from '@nextui-org/react';
 import { motion } from 'framer-motion';
-import { Calendar, User, ArrowRight } from 'lucide-react';
+import { Calendar, User } from 'lucide-react';
 import { apiService, Post, extractErrorMessage } from '../services/apiService';
 import { pageVariants } from '../utils/animation-utils';
 
@@ -148,10 +148,7 @@ const BlogsPage: React.FC = () => {
                                                                 year: 'numeric'
                                                             })}</span>
                                                         </div>
-                                                        <div className="ml-auto flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium">
-                                                            Read More
-                                                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>
