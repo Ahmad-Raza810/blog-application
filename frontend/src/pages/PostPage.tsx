@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiService, Post, extractErrorMessage } from '../services/apiService';
 import { useAuth } from '../components/AuthContext';
-import { Button, Chip, Textarea, Avatar } from '@nextui-org/react';
-import { Edit, Trash2, Calendar, Clock, ArrowLeft, Share2, Bookmark, Heart, MessageCircle, Send, ThumbsUp } from 'lucide-react';
+import { Button, Chip, Avatar } from '@nextui-org/react';
+import { Edit, Trash2, Calendar, Clock, ArrowLeft, Share2, Bookmark, Heart, MessageCircle } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { pageVariants, fadeIn } from '../utils/animation-utils';
+import CommentsSection from '../components/CommentsSection';
 
 const PostPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,7 +18,6 @@ const PostPage: React.FC = () => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(124); // Mock count
-  const [commentText, setCommentText] = useState('');
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -231,54 +231,7 @@ const PostPage: React.FC = () => {
             </motion.div>
           )}
 
-          {/* Comments Section */}
-          <div className="mt-16 pt-10 border-t border-secondary-200 dark:border-secondary-800">
-            <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-8">Comments (3)</h3>
-
-            {/* Add Comment */}
-            <div className="flex gap-4 mb-10">
-              <Avatar src={user?.avatar} name={user?.name?.charAt(0)} className="flex-shrink-0" />
-              <div className="flex-grow">
-                <Textarea
-                  placeholder="What are your thoughts?"
-                  minRows={3}
-                  value={commentText}
-                  onValueChange={setCommentText}
-                  className="mb-3"
-                  variant="faded"
-                />
-                <Button color="primary" endContent={<Send size={16} />}>
-                  Post Comment
-                </Button>
-              </div>
-            </div>
-
-            {/* Mock Comments List */}
-            <div className="space-y-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-4">
-                  <Avatar src={`https://i.pravatar.cc/150?u=${i}`} className="flex-shrink-0" />
-                  <div className="flex-grow">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-secondary-900 dark:text-white">Alex Johnson</span>
-                      <span className="text-xs text-secondary-500">• 2 hours ago</span>
-                    </div>
-                    <p className="text-secondary-600 dark:text-secondary-300 mb-2">
-                      Great article! I really learned a lot from this. Especially the part about state management.
-                    </p>
-                    <div className="flex items-center gap-4">
-                      <button className="flex items-center gap-1 text-xs text-secondary-500 hover:text-primary transition-colors">
-                        <ThumbsUp size={14} /> 12 Likes
-                      </button>
-                      <button className="text-xs text-secondary-500 hover:text-primary transition-colors">
-                        Reply
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CommentsSection postId={post.id} />
         </div>
       </div>
     </motion.article>
