@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiService, Post, extractErrorMessage } from '../services/apiService';
 import { useAuth } from '../components/AuthContext';
 import { Button, Chip, Avatar } from '@nextui-org/react';
-import { Edit, Trash2, Calendar, Clock, ArrowLeft, Share2, Bookmark, Heart, MessageCircle } from 'lucide-react';
+import { Edit, Trash2, Calendar, Clock, ArrowLeft, Share2, MessageCircle } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { pageVariants, fadeIn } from '../utils/animation-utils';
@@ -16,8 +16,7 @@ const PostPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(124); // Mock count
+  const [showComments, setShowComments] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -49,11 +48,6 @@ const PostPage: React.FC = () => {
     }
   };
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
-  };
-
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 animate-pulse space-y-8">
@@ -73,8 +67,8 @@ const PostPage: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">Post not found</h2>
-        <Button as={Link} to="/" color="primary" variant="flat" startContent={<ArrowLeft size={18} />}>
-          Back to Home
+        <Button as={Link} to="/blogs" color="primary" variant="flat" startContent={<ArrowLeft size={18} />}>
+          Back to Blogs
         </Button>
       </div>
     );
@@ -89,41 +83,31 @@ const PostPage: React.FC = () => {
       animate="animate"
       variants={pageVariants}
     >
-      {/* Navigation & Actions */}
-      <div className="flex justify-between items-center mb-8 sticky top-20 z-10 bg-white/80 dark:bg-secondary-900/80 backdrop-blur-md p-4 rounded-xl border border-secondary-100 dark:border-secondary-800 shadow-sm">
+      {/* 1. Top Row: Back and Share */}
+      <div className="flex justify-between items-center mb-8">
         <Button
           as={Link}
-          to="/"
+          to="/blogs"
           variant="light"
           startContent={<ArrowLeft size={18} />}
           className="text-secondary-600 dark:text-secondary-400 hover:text-primary font-medium"
         >
           Back
         </Button>
-        <div className="flex gap-2">
-          <Button
-            isIconOnly
-            variant="flat"
-            className={`bg-secondary-50 dark:bg-secondary-800 ${isLiked ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-secondary-600'}`}
-            onPress={handleLike}
-          >
-            <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
-          </Button>
-          <Button isIconOnly variant="flat" className="bg-secondary-50 dark:bg-secondary-800 text-secondary-600">
-            <MessageCircle size={20} />
-          </Button>
-          <Button isIconOnly variant="flat" className="bg-secondary-50 dark:bg-secondary-800 text-secondary-600">
-            <Bookmark size={20} />
-          </Button>
-          <Button isIconOnly variant="flat" className="bg-secondary-50 dark:bg-secondary-800 text-secondary-600">
-            <Share2 size={20} />
-          </Button>
-        </div>
+        <Button isIconOnly variant="light" className="text-secondary-600 dark:text-secondary-400">
+          <Share2 size={20} />
+        </Button>
       </div>
 
-      {/* Header Section */}
+      {/* 2. Header Section: Title -> Category/Tags -> Meta */}
       <motion.header className="mb-10 text-center" variants={fadeIn}>
-        <div className="flex flex-wrap justify-center gap-2 mb-6">
+        {/* Title */}
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 text-secondary-900 dark:text-white">
+          {post.title}
+        </h1>
+
+        {/* Category & Tags */}
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
           <Chip color="primary" variant="shadow" className="font-medium">
             {post.category.name}
           </Chip>
@@ -134,10 +118,7 @@ const PostPage: React.FC = () => {
           ))}
         </div>
 
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-8 text-secondary-900 dark:text-white">
-          {post.title}
-        </h1>
-
+        {/* 3. Author/Meta */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-secondary-500 py-6 border-y border-secondary-100 dark:border-secondary-800">
           <div className="flex items-center gap-3">
             <Avatar src={`https://i.pravatar.cc/150?u=${post.author?.id}`} size="sm" isBordered color="primary" />
@@ -178,62 +159,65 @@ const PostPage: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Sidebar Actions (Left) */}
-        <div className="hidden lg:flex flex-col gap-4 col-span-1 sticky top-32 h-fit">
-          <div className="flex flex-col items-center gap-2 text-secondary-500">
-            <Button isIconOnly radius="full" variant="light" className={isLiked ? "text-red-500" : ""} onPress={handleLike}>
-              <Heart size={24} fill={isLiked ? "currentColor" : "none"} />
-            </Button>
-            <span className="text-xs font-bold">{likeCount}</span>
-          </div>
-          <div className="flex flex-col items-center gap-2 text-secondary-500">
-            <Button isIconOnly radius="full" variant="light">
-              <MessageCircle size={24} />
-            </Button>
-            <span className="text-xs font-bold">8</span>
-          </div>
-        </div>
+      {/* Main Content (No Sidebar) */}
+      <div className="max-w-none mb-12">
+        <div
+          className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-headings:font-bold prose-headings:text-secondary-900 dark:prose-headings:text-white prose-p:text-secondary-600 dark:prose-p:text-secondary-300 prose-p:leading-relaxed prose-a:text-primary hover:prose-a:text-primary-600 prose-img:rounded-2xl prose-img:shadow-lg mb-8"
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+        />
 
-        {/* Main Content */}
-        <div className="col-span-1 lg:col-span-11">
-          <div
-            className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-headings:font-bold prose-headings:text-secondary-900 dark:prose-headings:text-white prose-p:text-secondary-600 dark:prose-p:text-secondary-300 prose-p:leading-relaxed prose-a:text-primary hover:prose-a:text-primary-600 prose-img:rounded-2xl prose-img:shadow-lg mb-12"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
-          />
-
-          {/* Author Actions */}
-          {isAuthor && (
-            <motion.div
-              className="flex justify-end gap-3 py-6 border-t border-secondary-200 dark:border-secondary-800"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+        {/* Author Actions */}
+        {isAuthor && (
+          <div className="flex justify-end gap-3 py-6 border-t border-secondary-200 dark:border-secondary-800">
+            <Button
+              as={Link}
+              to={`/posts/${post.id}/edit`}
+              color="primary"
+              variant="flat"
+              startContent={<Edit size={18} />}
             >
-              <Button
-                as={Link}
-                to={`/posts/${post.id}/edit`}
-                color="primary"
-                variant="flat"
-                startContent={<Edit size={18} />}
-              >
-                Edit Post
-              </Button>
-              <Button
-                color="danger"
-                variant="flat"
-                startContent={<Trash2 size={18} />}
-                onPress={handleDelete}
-              >
-                Delete Post
-              </Button>
-            </motion.div>
-          )}
-
-          <CommentsSection postId={post.id} />
-        </div>
+              Edit Post
+            </Button>
+            <Button
+              color="danger"
+              variant="flat"
+              startContent={<Trash2 size={18} />}
+              onPress={handleDelete}
+            >
+              Delete Post
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* 4. Show Comments Button */}
+      <div className="flex flex-col items-center gap-8 border-t border-secondary-200 dark:border-secondary-800 pt-10">
+        {!showComments ? (
+          <Button
+            variant="shadow"
+            color="primary"
+            size="lg"
+            startContent={<MessageCircle size={20} />}
+            onPress={() => setShowComments(true)}
+          >
+            Show Comments
+          </Button>
+        ) : (
+          <div className="w-full">
+            <div className="flex justify-center mb-6">
+              <Button
+                variant="light"
+                color="secondary"
+                onPress={() => setShowComments(false)}
+              >
+                Hide Comments
+              </Button>
+            </div>
+            <CommentsSection postId={post.id} />
+          </div>
+        )}
+      </div>
+
     </motion.article>
   );
 };
