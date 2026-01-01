@@ -64,6 +64,18 @@ export interface Post {
   status?: PostStatus;
 }
 
+export interface Comment {
+  commentId: string;
+  content: string;
+  createdAt?: string; // Optional as backend might not return it
+  author: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  postId: string;
+}
+
 export interface CreatePostRequest {
   title: string;
   content: string;
@@ -307,6 +319,23 @@ class ApiService {
       ...post,
       status: post.postStatus || post.status, // Map postStatus to status
     }));
+  }
+
+  // Comment Endpoints
+
+  public async getPostComments(postId: string): Promise<Comment[]> {
+    const response: AxiosResponse<{ data: Comment[] }> = await this.api.get(`/posts/${postId}/comments`);
+    // Handle potential wrapper differences, assuming strictly standard response for now or extracting data
+    return response.data.data;
+  }
+
+  public async createComment(postId: string, content: string): Promise<Comment> {
+    const response: AxiosResponse<{ data: Comment }> = await this.api.post(`/posts/${postId}/comments`, { content });
+    return response.data.data;
+  }
+
+  public async deleteComment(commentId: string): Promise<void> {
+    await this.api.delete(`/comments/${commentId}`);
   }
 }
 
