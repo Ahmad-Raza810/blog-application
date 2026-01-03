@@ -21,6 +21,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
     const location = useLocation();
 
     useEffect(() => {
+        // Check for saved comment draft
+        const savedComment = sessionStorage.getItem(`comment_draft_${postId}`);
+        if (savedComment) {
+            setCommentText(savedComment);
+            sessionStorage.removeItem(`comment_draft_${postId}`);
+            // Small delay to ensure render complete before scrolling/focus if needed
+            // The browser handles #comments scroll automatically if the ID exists
+        }
         fetchComments();
     }, [postId]);
 
@@ -41,10 +49,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
 
     const handleSubmitComment = async () => {
         if (!user) {
-            const returnUrl = encodeURIComponent(location.pathname + location.search);
+            // Save comment text to session storage
+            if (commentText.trim()) {
+                sessionStorage.setItem(`comment_draft_${postId}`, commentText);
+            }
+
+            const returnUrl = encodeURIComponent(location.pathname + location.search + '#comments');
             const loginUrl = `/login?returnUrl=${returnUrl}`;
             console.log('Redirecting to login with return URL:', loginUrl);
-            console.log('Current location:', location.pathname + location.search);
             navigate(loginUrl);
             return;
         }
@@ -86,7 +98,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
     }
 
     return (
-        <div className="mt-16 pt-10 border-t border-secondary-200 dark:border-secondary-800">
+        <div id="comments" className="mt-16 pt-10 border-t border-secondary-200 dark:border-secondary-800">
             <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-8 flex items-center gap-2">
                 <MessageCircle size={24} />
                 Comments ({comments.length})
