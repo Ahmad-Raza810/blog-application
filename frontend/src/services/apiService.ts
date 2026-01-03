@@ -203,7 +203,9 @@ class ApiService {
     localStorage.setItem('token', response.data.token);
 
     // ✅ Immediately refresh UI
-    window.location.href = '/';  // redirect to homepage
+    // ✅ Immediately refresh UI
+    // window.location.href = '/';  // REMOVED: Let the UI handle navigation
+
 
     return response.data;
   }
