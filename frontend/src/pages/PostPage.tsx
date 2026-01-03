@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { apiService, Post, extractErrorMessage } from '../services/apiService';
 import { useAuth } from '../components/AuthContext';
 import { Button, Chip, Avatar } from '@nextui-org/react';
@@ -16,7 +16,22 @@ const PostPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [showComments, setShowComments] = useState(false);
+  const location = useLocation();
+  const [showComments, setShowComments] = useState(location.hash === '#comments');
+
+  // Handle hash change or initial load with hash
+  useEffect(() => {
+    if (location.hash === '#comments') {
+      setShowComments(true);
+      // Optional: scroll into view if not handled automatically
+      setTimeout(() => {
+        const commentsElement = document.getElementById('comments');
+        if (commentsElement) {
+          commentsElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
 
   useEffect(() => {
     const fetchPost = async () => {
