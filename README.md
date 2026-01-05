@@ -66,8 +66,8 @@ Navigate to the project root and build the backend:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/blog-platform.git
-cd blog-platform
+git clone https://github.com/Ahmad-Raza810/blog-application.git
+cd backend
 
 # Build the project
 ./mvnw clean install
