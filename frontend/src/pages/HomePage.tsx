@@ -34,7 +34,7 @@ const HomePage: React.FC = () => {
           apiService.getTrendingPosts(),
         ]);
 
-        setPosts(postsResponse);
+        setPosts(postsResponse.posts);
         setCategories(categoriesResponse);
         setFeaturedPosts(featuredResponse);
         setTrendingPosts(trendingResponse);
