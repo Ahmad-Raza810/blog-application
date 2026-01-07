@@ -2,6 +2,7 @@ package com.projects.blog_application.service.Impl;
 
 import com.projects.blog_application.domain.PostStatus;
 import com.projects.blog_application.domain.dtos.CreatePostDTO;
+import com.projects.blog_application.domain.dtos.PageResponse;
 import com.projects.blog_application.domain.dtos.PostUpdateDTO;
 import com.projects.blog_application.domain.entities.Category;
 import com.projects.blog_application.domain.entities.Post;
@@ -9,15 +10,21 @@ import com.projects.blog_application.domain.entities.Tag;
 import com.projects.blog_application.domain.entities.User;
 import com.projects.blog_application.exception.NotAllowedOperationException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
+import com.projects.blog_application.mapper.PostMapper;
 import com.projects.blog_application.repositories.PostRepository;
 import com.projects.blog_application.service.CategoryService;
 import com.projects.blog_application.service.PostService;
 import com.projects.blog_application.service.TagService;
 import com.projects.blog_application.service.UserService;
+import com.projects.blog_application.util.CursorDecoder;
+import com.projects.blog_application.util.CursorEncoder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,32 +36,62 @@ public class PostServiceImpl implements PostService {
     private final CategoryService categoryService;
     private final TagService tagService;
     private final UserService userService;
+    private final PostMapper postMapper;
     private final static int WORD_PER_MINUTE = 200;
 
 
     //service method for get all post
     @Override
     @Transactional
-    public List<Post> getAllPosts(UUID categoryId, UUID tagId) {
+    public PageResponse getAllPosts(int pageSize, String cursor) {
 
-        if (categoryId != null && tagId != null) {
-            Category category = categoryService.getCategoryById(categoryId);
-            Tag tag = tagService.getTagById(tagId);
+        pageSize = Math.min(pageSize, 20);
 
-            return postRepository.findAllByPostStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag);
+        Pageable pageable = PageRequest.of(0, pageSize + 1);
+        List<Post> posts;
+
+        if (cursor == null) {
+            posts = postRepository
+                    .findByPostStatusOrderByCreatedAtDesc(pageable, PostStatus.PUBLISHED);
+        } else {
+            LocalDateTime decodedCursor = CursorDecoder.cursorDecoder(cursor);
+            posts = postRepository
+                    .findByPostStatusAndCreatedAtLessThanOrderByCreatedAtDesc(
+                            PostStatus.PUBLISHED,
+                            decodedCursor,
+                            pageable
+                    );
         }
 
-        if (categoryId != null) {
-            Category category = categoryService.getCategoryById(categoryId);
-            return postRepository.findAllByPostStatusAndCategory(PostStatus.PUBLISHED, category);
+        boolean hasMore = posts.size() > pageSize;
+
+        if (hasMore) {
+            posts = posts.subList(0, pageSize);
         }
 
-        if (tagId != null) {
-            Tag tag = tagService.getTagById(tagId);
-            return postRepository.findAllByPostStatusAndTagsContaining(PostStatus.PUBLISHED, tag);
+        if (posts.isEmpty()) {
+            return new PageResponse(
+                    Collections.emptyList(),
+                    null,
+                    false
+            );
         }
 
-        return postRepository.findAllByPostStatus(PostStatus.PUBLISHED);
+        String encodedCursor = null;
+        if (hasMore) {
+            encodedCursor = CursorEncoder.encodeCursor(
+                    posts.getLast().getCreatedAt()
+            );
+        }
+
+        return new PageResponse(
+                posts.stream()
+                        .map(postMapper::toDto)
+                        .collect(Collectors.toList()),
+                encodedCursor,
+                hasMore
+        );
+
     }
 
     //service method for get drafts post only

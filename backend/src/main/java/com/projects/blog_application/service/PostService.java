@@ -1,6 +1,7 @@
 package com.projects.blog_application.service;
 
 import com.projects.blog_application.domain.dtos.CreatePostDTO;
+import com.projects.blog_application.domain.dtos.PageResponse;
 import com.projects.blog_application.domain.dtos.PostRequestDTO;
 import com.projects.blog_application.domain.dtos.PostUpdateDTO;
 import com.projects.blog_application.domain.entities.Post;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 public interface PostService {
 
-    List<Post> getAllPosts(UUID categoryId, UUID tagId);
+    PageResponse getAllPosts(int pageSize, String cursor);
 
     List<Post> getDrafts(UUID id);
 
