@@ -24,11 +24,9 @@ public class CursorDecoder {
             return LocalDateTime.parse(decodedCursor);
 
         } catch (IllegalArgumentException e) {
-            // Base64 decoding issue
             throw new InvalidCursorException("Invalid cursor encoding");
 
         } catch (DateTimeException e) {
-            // LocalDateTime parsing issue
             throw new InvalidCursorException("Invalid cursor value");
         }
     }
