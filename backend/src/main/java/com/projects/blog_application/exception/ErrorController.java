@@ -156,6 +156,19 @@ public class ErrorController {
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
+    //invalid cursor exception handler
+    @ExceptionHandler(InvalidCursorException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCursor(
+            InvalidCursorException exception
+    ) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(exception.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
 
     //handler for any other exception
     @ExceptionHandler(Exception.class)

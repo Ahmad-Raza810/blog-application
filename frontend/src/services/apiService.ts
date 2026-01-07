@@ -217,10 +217,24 @@ class ApiService {
   public async getPosts(params: {
     categoryId?: string;
     tagId?: string;
-    authorId?: string; // Add authorId to filter posts by user
-  }): Promise<Post[]> {
+    authorId?: string;
+    cursor?: string;
+    pageSize?: number;
+  }): Promise<{ posts: Post[]; cursor: string | null; hasMore: boolean }> {
     const response = await this.api.get('/posts', { params });
-    return response.data.data; // ✅ inner data
+    // Assuming backend returns { data: { posts: [], cursor: "...", hasMore: true } }
+    // Or if backend returns directly in data: { posts: [], cursor: "...", hasMore: true }
+    // Based on "response:includes three fields private List<PostResponseDTO> posts; private String cursor; private boolean hasMore;"
+    // Check if the response is wrapped in a generic ApiResponse or not.
+    // Usually your backend wraps in { message, data, status, ... }
+
+    // ADJUSTING to typical pattern seen in this file: response.data.data contains the payload
+    const data = response.data.data;
+    return {
+      posts: data.posts,
+      cursor: data.cursor,
+      hasMore: data.hasMore
+    };
   }
 
   public async getPost(id: string): Promise<Post> {

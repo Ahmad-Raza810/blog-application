@@ -1,6 +1,7 @@
 package com.projects.blog_application.controllers;
 
 import com.projects.blog_application.domain.dtos.CreatePostDTO;
+import com.projects.blog_application.domain.dtos.PageResponse;
 import com.projects.blog_application.domain.dtos.PostResponseDTO;
 import com.projects.blog_application.domain.dtos.PostUpdateDTO;
 import com.projects.blog_application.domain.entities.Post;
@@ -30,16 +31,16 @@ public class PostController {
     //endpoint for get all posts
     @GetMapping
     @Transactional(readOnly = true)
-    public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getAllPosts(
-            @RequestParam(required = false) UUID categoryId,
-            @RequestParam(required = false) UUID tagId) {
+    public ResponseEntity<ApiResponse<PageResponse>> getAllPosts(
+            @RequestParam(required = false,defaultValue ="5")int pageSize,
+            @RequestParam(required = false) String cursor
+            ) {
 
-        List<Post> posts = postService.getAllPosts(categoryId, tagId);
-        List<PostResponseDTO> dtos = posts.stream().map(postMapper::toDto).toList();
+        PageResponse pageResponse=postService.getAllPosts(pageSize,cursor);
 
-        ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>(
+        ApiResponse<PageResponse> response = new ApiResponse<>(
                 "Posts fetched successfully.",
-                dtos,
+                pageResponse,
                 HttpStatus.OK.value(),
                 true,
                 LocalDateTime.now()
