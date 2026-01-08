@@ -122,7 +122,7 @@ const Footer = () => {
                         © {currentYear} ContentHub. All rights reserved.
                     </p>
                     <p className="text-sm text-secondary-500 dark:text-secondary-400 flex items-center gap-1">
-                        Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by Ahmad
+                        Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by DevTiro
                     </p>
                 </div>
             </div>
