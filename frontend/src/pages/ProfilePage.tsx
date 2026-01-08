@@ -56,18 +56,22 @@ const ProfilePage: React.FC = () => {
       <Card className="hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-800">
         <CardBody className="flex flex-row gap-4 p-4">
           <div className="w-24 h-24 rounded-lg bg-slate-100 flex-shrink-0 overflow-hidden">
-            {post.coverImage ? (
-              <img src={post.coverImage} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
-                <FileText size={24} />
-              </div>
-            )}
+            <Link to={`/posts/${post.id}`}>
+              {post.coverImage ? (
+                <img src={post.coverImage} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
+                  <FileText size={24} />
+                </div>
+              )}
+            </Link>
           </div>
           <div className="flex-grow flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start">
-                <h3 className="font-bold text-lg line-clamp-1">{post.title}</h3>
+                <Link to={`/posts/${post.id}`} className="hover:text-primary transition-colors">
+                  <h3 className="font-bold text-lg line-clamp-1">{post.title}</h3>
+                </Link>
                 <Chip size="sm" variant="flat" color={isDraft ? "warning" : "primary"}>
                   {isDraft ? "Draft" : post.category.name}
                 </Chip>
