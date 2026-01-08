@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../components/AuthContext';
 import { apiService, Post, extractErrorMessage } from '../services/apiService';
 import { Card, CardBody, CardHeader, Button, Avatar, Tabs, Tab, Chip } from '@nextui-org/react';
-import { Edit, Trash2, Plus, FileText, Heart, MessageSquare, Settings, LogOut } from 'lucide-react';
+import { Edit, Trash2, Plus, FileText, MessageSquare, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { pageVariants, container, item } from '../utils/animation-utils';
