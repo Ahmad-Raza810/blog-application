@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Heart } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail } from 'lucide-react';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
@@ -122,7 +122,7 @@ const Footer = () => {
                         © {currentYear} ContentHub. All rights reserved.
                     </p>
                     <p className="text-sm text-secondary-500 dark:text-secondary-400 flex items-center gap-1">
-                        Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by DevTiro
+                        Made by Ahmad
                     </p>
                 </div>
             </div>
