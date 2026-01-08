@@ -116,28 +116,50 @@ const ProfilePage: React.FC = () => {
       variants={pageVariants}
     >
       {/* Profile Header */}
-      <div className="relative mb-24">
-        <div className="h-48 rounded-3xl bg-gradient-hero shadow-lg" />
-        <div className="absolute -bottom-16 left-8 flex items-end gap-6">
-          <Avatar
-            src={undefined}
-            name={user.name}
-            className="w-32 h-32 text-3xl border-4 border-white dark:border-slate-900 shadow-xl"
-            color="primary"
-            isBordered
-          />
-          <div className="mb-4">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{user.name}</h1>
-            <p className="text-slate-500 dark:text-slate-400">{user.email}</p>
+      <div className="relative mb-24 rounded-3xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800 pb-4 overflow-visible">
+        <div className="h-48 rounded-t-3xl bg-gradient-to-r from-blue-400 via-purple-400 to-pink-300" />
+
+        <div className="px-8 flex items-end relative -mt-16 sm:-mt-20 pb-2">
+          <div className="relative z-10">
+            <div className="rounded-full p-1.5 bg-white dark:bg-slate-900">
+              <Avatar
+                src={undefined}
+                name={user.name}
+                className="w-32 h-32 sm:w-40 sm:h-40 text-4xl"
+                classNames={{
+                  base: "bg-blue-500 text-white",
+                }}
+              />
+            </div>
           </div>
-        </div>
-        <div className="absolute bottom-4 right-8 flex gap-3">
-          <Button variant="flat" color="primary" startContent={<Settings size={18} />}>
-            Edit Profile
-          </Button>
-          <Button color="danger" variant="flat" startContent={<LogOut size={18} />} onPress={logout}>
-            Log Out
-          </Button>
+
+          <div className="flex-grow flex flex-col sm:flex-row items-start sm:items-end justify-between ml-4 sm:ml-6 mb-2 sm:mb-4 gap-4">
+            <div className="mt-16 sm:mt-0">
+              <h1 className="text-3xl font-bold text-slate-800 dark:text-gray-100">{user.name}</h1>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">{user.email}</p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Button
+                variant="light"
+                color="primary"
+                startContent={<Edit size={18} />}
+                className="font-medium px-2 min-w-0 h-auto gap-2"
+              >
+                Edit
+              </Button>
+              <div className="h-4 w-[1px] bg-slate-300 dark:bg-slate-700"></div>
+              <Button
+                variant="light"
+                color="danger"
+                startContent={<LogOut size={18} />}
+                onPress={logout}
+                className="font-medium px-2 min-w-0 h-auto gap-2"
+              >
+                Log out
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
