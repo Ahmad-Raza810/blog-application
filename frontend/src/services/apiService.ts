@@ -21,7 +21,17 @@ export interface RegisterResponse {
 
 export interface AuthResponse {
   token: string;
-  expiresIn: number;
+  issuedAt: number;
+  expiresAt: number;
+  refreshToken: string;
+  refExpiry: number;
+}
+
+export interface RefreshTokenResponse {
+  refreshToken: string;
+  accessToken: string;
+  refreshExpTime: string;
+  accessExpTime: string;
 }
 
 export interface UserProfile {
@@ -134,6 +144,20 @@ export enum PostStatus {
 class ApiService {
   private api: AxiosInstance;
   private static instance: ApiService;
+  private isRefreshing = false;
+  private failedQueue: any[] = [];
+
+  private processQueue(error: any, token: string | null = null) {
+    this.failedQueue.forEach(prom => {
+      if (error) {
+        prom.reject(error);
+      } else {
+        prom.resolve(token);
+      }
+    });
+
+    this.failedQueue = [];
+  }
 
   private constructor() {
     this.api = axios.create({
@@ -147,8 +171,19 @@ class ApiService {
     this.api.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         const token = localStorage.getItem('token');
-        if (token) {
+        console.log(`[Request] ${config.url} | Token exists: ${!!token}`);
+
+        // valid token and NOT a refresh token request
+        if (token && !config.url?.includes('/auth/refresh-token')) {
           config.headers.Authorization = `Bearer ${token}`;
+          console.log(`[Request] Attached Authorization header`);
+        } else if (config.url?.includes('/auth/refresh-token')) {
+          // Explicitly remove Authorizaton header for refresh requests
+          if (typeof config.headers.delete === 'function') {
+            config.headers.delete('Authorization');
+          } else {
+            delete config.headers['Authorization'];
+          }
         }
         return config;
       },
@@ -160,14 +195,80 @@ class ApiService {
     // Add response interceptor for error handling
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
-      (error: AxiosError) => {
-        // Prevent redirect loop if 401 happens during login
-        const isLoginRequest = error.config?.url?.includes('/auth/login');
+      async (error: AxiosError) => {
+        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-        if (error.response?.status === 401 && !isLoginRequest) {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+        // Prevent redirect loop if 401 happens during login or refresh
+        const isLoginRequest = originalRequest.url?.includes('/auth/login');
+        const isRefreshRequest = originalRequest.url?.includes('/auth/refresh-token');
+
+        if (error.response?.status === 401) {
+          console.log(`[Response] 401 Error for ${originalRequest.url} | Retry: ${originalRequest._retry} | IsRefreshing: ${this.isRefreshing}`);
         }
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest && !isRefreshRequest) {
+
+          if (this.isRefreshing) {
+            console.log('[Response] Queuing request...');
+            return new Promise<AxiosResponse>((resolve, reject) => {
+              this.failedQueue.push({
+                resolve: (token: string) => {
+                  originalRequest.headers.Authorization = 'Bearer ' + token;
+                  resolve(this.api(originalRequest));
+                },
+                reject: (err: any) => {
+                  reject(err);
+                }
+              });
+            });
+          }
+
+          originalRequest._retry = true;
+          this.isRefreshing = true;
+
+          const refreshToken = localStorage.getItem('refreshToken');
+
+          if (refreshToken) {
+            try {
+              console.log('[Response] Attempting refresh...');
+              const { accessToken, refreshToken: newRefreshToken } = await this.refreshToken(refreshToken);
+              console.log('[Response] Refresh success!');
+
+              // Update tokens
+              localStorage.setItem('token', accessToken);
+              localStorage.setItem('refreshToken', newRefreshToken);
+
+              // Update authorization header for next requests
+              this.api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+              // Process queue
+              this.processQueue(null, accessToken);
+
+              // Retry original request
+              originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+              return this.api(originalRequest);
+            } catch (refreshError: any) {
+              console.error('[Response] Refresh failed', refreshError);
+              this.processQueue(refreshError, null);
+              this.logout();
+              window.location.href = '/login';
+              return Promise.reject(refreshError);
+            } finally {
+              this.isRefreshing = false;
+            }
+          } else {
+            console.log('[Response] No refresh token found');
+            this.isRefreshing = false;
+            this.logout();
+            window.location.href = '/login';
+          }
+        }
+
+        // Standard error handling
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          // If we reach here, it means we didn't try to refresh
+        }
+
         return Promise.reject(this.handleError(error));
       }
     );
@@ -193,6 +294,14 @@ class ApiService {
   }
 
   // Auth endpoints
+  public setAuthToken(token: string | null) {
+    if (token) {
+      this.api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete this.api.defaults.headers.common['Authorization'];
+    }
+  }
+
   public async register(userData: RegisterRequest): Promise<RegisterResponse> {
     const response: AxiosResponse<RegisterResponse> = await this.api.post('/auth/register', userData);
     return response.data;
@@ -201,8 +310,8 @@ class ApiService {
   public async login(credentials: LoginRequest): Promise<AuthResponse> {
     const response: AxiosResponse<AuthResponse> = await this.api.post('/auth/login', credentials);
     localStorage.setItem('token', response.data.token);
+    localStorage.setItem('refreshToken', response.data.refreshToken);
 
-    // ✅ Immediately refresh UI
     // ✅ Immediately refresh UI
     // window.location.href = '/';  // REMOVED: Let the UI handle navigation
 
@@ -210,8 +319,14 @@ class ApiService {
     return response.data;
   }
 
+  public async refreshToken(token: string): Promise<RefreshTokenResponse> {
+    const response: AxiosResponse<RefreshTokenResponse> = await this.api.post('/auth/refresh-token', { refreshToken: token });
+    return response.data;
+  }
+
   public logout(): void {
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
   }
 
   public async getPosts(params: {
