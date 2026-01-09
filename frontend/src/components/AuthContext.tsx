@@ -96,11 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Update apiService token when it changes
   useEffect(() => {
-    if (token) {
-      // Update axios instance configuration
-      const axiosInstance = apiService['api'];
-      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
+    apiService.setAuthToken(token);
   }, [token]);
 
   const value = {
