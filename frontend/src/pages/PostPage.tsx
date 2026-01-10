@@ -101,8 +101,7 @@ const PostPage: React.FC = () => {
       {/* 1. Top Row: Back and Share */}
       <div className="flex justify-between items-center mb-8">
         <Button
-          as={Link}
-          to="/blogs"
+          onPress={() => navigate(-1)}
           variant="light"
           startContent={<ArrowLeft size={18} />}
           className="text-secondary-600 dark:text-secondary-400 hover:text-primary font-medium"
