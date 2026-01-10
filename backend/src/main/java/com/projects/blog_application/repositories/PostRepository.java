@@ -32,6 +32,21 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     List<Post> findByPostStatusOrderByCreatedAtDesc(Pageable pageable,PostStatus postStatus);
 
+    List<Post> findByPostStatusAndCategoryIdOrderByCreatedAtDesc(
+            PostStatus postStatus,
+            UUID categoryId,
+            Pageable pageable
+    );
+
+    List<Post> findByPostStatusAndCategoryIdAndCreatedAtLessThanOrderByCreatedAtDesc(
+            PostStatus postStatus,
+            UUID categoryId,
+            LocalDateTime cursor,
+            Pageable pageable
+    );
+
+
+
     List<Post> findByPostStatusAndCreatedAtLessThanOrderByCreatedAtDesc(
             PostStatus status,
             LocalDateTime cursor,
