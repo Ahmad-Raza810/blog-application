@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardBody, Chip, Spinner, Button } from '@nextui-org/react';
 import { motion } from 'framer-motion';
 import { Calendar, User } from 'lucide-react';
@@ -87,6 +87,10 @@ const BlogCard = React.memo(({ post, index, onPostClick }: { post: Post; index: 
 
 const BlogsPage: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const categoryId = searchParams.get('category');
+    const tagId = searchParams.get('tag'); // Get Tag ID
+
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -94,7 +98,8 @@ const BlogsPage: React.FC = () => {
     const [cursor, setCursor] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(true);
 
-    const BLOGS_CACHE_KEY = 'blogs_page_cache';
+    // Update Cache Key to include Tag
+    const BLOGS_CACHE_KEY = `blogs_page_cache${categoryId ? `_cat_${categoryId}` : ''}${tagId ? `_tag_${tagId}` : ''}`;
 
     // Fetch posts with pagination
     const fetchPosts = async (currentCursor: string | null = null, append = false) => {
@@ -106,8 +111,8 @@ const BlogsPage: React.FC = () => {
             }
 
             const response = await apiService.getPosts({
-                categoryId: undefined,
-                tagId: undefined,
+                categoryId: categoryId || undefined,
+                tagId: tagId || undefined, // Pass Tag ID
                 cursor: currentCursor || undefined,
                 pageSize: 10 // Adjust pageSize as needed
             });
@@ -172,7 +177,7 @@ const BlogsPage: React.FC = () => {
         } else {
             fetchPosts(null, false);
         }
-    }, []);
+    }, [BLOGS_CACHE_KEY]);
 
     // Explicitly handle post clicks to save state BEFORE navigation/unmount
     const handlePostClick = (postId: string) => {
@@ -203,6 +208,37 @@ const BlogsPage: React.FC = () => {
             animate="animate"
             variants={pageVariants}
         >
+            {/* Request Header if Category or Tag Filter is active */}
+            {(categoryId || tagId) && (
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col md:flex-row justify-between items-center bg-white/50 dark:bg-secondary-800/50 backdrop-blur-md p-6 rounded-2xl border border-secondary-200 dark:border-secondary-700"
+                    >
+                        <div>
+                            <p className="text-secondary-500 dark:text-secondary-400 text-sm uppercase tracking-wider font-semibold mb-1">
+                                {tagId ? 'Browsing Tag' : 'Browsing Category'}
+                            </p>
+                            <h1 className="text-3xl font-bold text-secondary-900 dark:text-white">
+                                {tagId
+                                    ? (searchParams.get('tagName') || 'Tag Archives')
+                                    : (searchParams.get('categoryName') || 'Category Archives')
+                                }
+                            </h1>
+                        </div>
+                        <Button
+                            color="primary"
+                            variant="flat"
+                            className="mt-4 md:mt-0"
+                            onPress={() => navigate('/blogs')}
+                        >
+                            View All Articles
+                        </Button>
+                    </motion.div>
+                </div>
+            )}
+
             {/* Blog Posts - Centered and Larger */}
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                 {loading && posts.length === 0 ? (
@@ -215,7 +251,15 @@ const BlogsPage: React.FC = () => {
                     </div>
                 ) : posts.length === 0 ? (
                     <div className="text-center py-20">
-                        <p className="text-secondary-600 dark:text-secondary-400">No blogs found.</p>
+                        <p className="text-secondary-600 dark:text-secondary-400">
+                            {tagId
+                                ? 'No blogs found with this tag.'
+                                : categoryId
+                                    ? 'No blogs found in this category.'
+                                    : 'No blogs found.'
+                            }
+                        </p>
+
                     </div>
                 ) : (
                     <div className="space-y-8">
