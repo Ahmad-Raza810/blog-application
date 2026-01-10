@@ -255,7 +255,7 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
                   <Card
                     className="group h-full border border-white/20 dark:border-slate-700/60 bg-white/30 dark:bg-slate-800/70 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
                     isPressable
-                    onPress={() => navigate(`/?category=${category.id}`)}
+                    onPress={() => navigate(`/blogs?category=${category.id}&categoryName=${encodeURIComponent(category.name)}`)}
                     radius="lg"
                   >
                     <CardBody className="p-6 h-full relative cursor-pointer">
