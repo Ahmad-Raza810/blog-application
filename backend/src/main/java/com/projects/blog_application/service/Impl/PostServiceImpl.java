@@ -43,24 +43,46 @@ public class PostServiceImpl implements PostService {
     //service method for get all post
     @Override
     @Transactional
-    public PageResponse getAllPosts(int pageSize, String cursor) {
+    public PageResponse getAllPosts(int pageSize, String cursor, UUID categoryId) {
 
         pageSize = Math.min(pageSize, 20);
-
         Pageable pageable = PageRequest.of(0, pageSize + 1);
-        List<Post> posts;
 
-        if (cursor == null) {
+        List<Post> posts;
+        if (cursor == null && categoryId == null) {
+
             posts = postRepository
-                    .findByPostStatusOrderByCreatedAtDesc(pageable, PostStatus.PUBLISHED);
-        } else {
-            LocalDateTime decodedCursor = CursorDecoder.cursorDecoder(cursor);
+                    .findByPostStatusOrderByCreatedAtDesc(pageable,PostStatus.PUBLISHED);
+
+        } else if (cursor == null) {
+
             posts = postRepository
-                    .findByPostStatusAndCreatedAtLessThanOrderByCreatedAtDesc(
+                    .findByPostStatusAndCategoryIdOrderByCreatedAtDesc(
                             PostStatus.PUBLISHED,
-                            decodedCursor,
+                            categoryId,
                             pageable
                     );
+
+        } else {
+
+            LocalDateTime decodedCursor = CursorDecoder.cursorDecoder(cursor);
+
+            if (categoryId == null) {
+                posts = postRepository
+                        .findByPostStatusAndCreatedAtLessThanOrderByCreatedAtDesc(
+                                PostStatus.PUBLISHED,
+                                decodedCursor,
+                                pageable
+                        );
+            } else {
+                posts = postRepository
+                        .findByPostStatusAndCategoryIdAndCreatedAtLessThanOrderByCreatedAtDesc(
+                                PostStatus.PUBLISHED,
+                                categoryId,
+                                decodedCursor,
+                                pageable
+                        );
+            }
         }
 
         boolean hasMore = posts.size() > pageSize;
@@ -77,22 +99,19 @@ public class PostServiceImpl implements PostService {
             );
         }
 
-        String encodedCursor = null;
-        if (hasMore) {
-            encodedCursor = CursorEncoder.encodeCursor(
-                    posts.getLast().getCreatedAt()
-            );
-        }
+        String nextCursor = hasMore
+                ? CursorEncoder.encodeCursor(posts.getLast().getCreatedAt())
+                : null;
 
         return new PageResponse(
                 posts.stream()
                         .map(postMapper::toDto)
                         .collect(Collectors.toList()),
-                encodedCursor,
+                nextCursor,
                 hasMore
         );
-
     }
+
 
     //service method for get drafts post only
     @Override

@@ -33,10 +33,11 @@ public class PostController {
     @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<PageResponse>> getAllPosts(
             @RequestParam(required = false,defaultValue ="5")int pageSize,
-            @RequestParam(required = false) String cursor
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) UUID categoryId
             ) {
 
-        PageResponse pageResponse=postService.getAllPosts(pageSize,cursor);
+        PageResponse pageResponse=postService.getAllPosts(pageSize,cursor,categoryId);
 
         ApiResponse<PageResponse> response = new ApiResponse<>(
                 "Posts fetched successfully.",

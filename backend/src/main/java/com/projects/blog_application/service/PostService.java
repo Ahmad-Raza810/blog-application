@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface PostService {
 
-    PageResponse getAllPosts(int pageSize, String cursor);
+    PageResponse getAllPosts(int pageSize, String cursor,UUID categoryId);
 
     List<Post> getDrafts(UUID id);
 
