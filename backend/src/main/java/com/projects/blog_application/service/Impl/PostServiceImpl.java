@@ -19,6 +19,10 @@ import com.projects.blog_application.service.UserService;
 import com.projects.blog_application.util.CursorDecoder;
 import com.projects.blog_application.util.CursorEncoder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,9 +47,10 @@ public class PostServiceImpl implements PostService {
     //service method for get all post
     @Override
     @Transactional
+    @Cacheable("posts")
     public PageResponse getAllPosts(int pageSize, String cursor, UUID categoryId) {
 
-        pageSize = Math.min(pageSize, 20);
+        pageSize = Math.min(pageSize, 60);
         Pageable pageable = PageRequest.of(0, pageSize + 1);
 
         List<Post> posts;
@@ -124,6 +129,10 @@ public class PostServiceImpl implements PostService {
     //service method for create a post
     @Override
     @Transactional
+    @Caching(
+            put = @CachePut(value = "posts_ids",key="#result.id"),
+            evict = @CacheEvict(value = "posts",allEntries = true)
+    )
     public Post createPost(CreatePostDTO createPostDTO, UUID userId) {
 
         User loggedInUser = userService.getUserById(userId);
@@ -157,6 +166,10 @@ public class PostServiceImpl implements PostService {
     //service method for update a post
     @Override
     @Transactional
+    @Caching(
+            put = @CachePut(value = "posts_ids",key="#result.id"),
+            evict = @CacheEvict(value = "posts",allEntries = true)
+    )
     public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO, UUID userId) {
 
         Post existingPost = postRepository.findById(id)
@@ -190,6 +203,7 @@ public class PostServiceImpl implements PostService {
     }
 
     //service method for get post by id
+    @Cacheable("posts_ids")
     @Override
     public Post getPost(UUID id) {
         return postRepository.findById(id)
@@ -198,13 +212,18 @@ public class PostServiceImpl implements PostService {
 
 
     //service method for delete a post
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "posts",allEntries = true),
+                    @CacheEvict(value = "posts_ids",key="#postId")
+            }
+    )
     @Override
     public void deletePost(UUID postId,UUID userId) {
-
-        if (!getPost(postId).getAuthor().getId().equals(userId)) {
+        Post post=getPost(postId);
+        if (!post.getAuthor().getId().equals(userId)) {
             throw new NotAllowedOperationException("You do not have permission to delete this post.");
         }
-        Post post = getPost(postId);
         postRepository.delete(post);
     }
 
@@ -217,6 +236,7 @@ public class PostServiceImpl implements PostService {
     }
 
     //service method for return featured post
+    @Cacheable("featured_post")
     @Override
     public List<Post> getFeaturedPost() {
         return postRepository.findTop5ByIsFeaturedTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
@@ -224,6 +244,7 @@ public class PostServiceImpl implements PostService {
 
 
     //service method which  return trending posts
+    @Cacheable("trending_post")
     @Override
     public List<Post> getTrendingPosts() {
         List<Post> trendingPosts=postRepository.findTByIsTrendingTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
