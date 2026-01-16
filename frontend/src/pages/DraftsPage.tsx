@@ -5,7 +5,7 @@ import {
   CardBody,
   Button,
 } from '@nextui-org/react';
-import { Plus, FileText, BookDashed, AlertCircle, Edit3 } from 'lucide-react';
+import { Plus, BookDashed, AlertCircle, Edit3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiService, Post, extractErrorMessage } from '../services/apiService';
 import PostList from '../components/PostList';
