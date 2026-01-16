@@ -10,6 +10,10 @@ import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.mapper.CommentMapper;
 import com.projects.blog_application.repositories.PostRepository;
 import com.projects.blog_application.repositories.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.projects.blog_application.repositories.CommentRepository;
 import com.projects.blog_application.service.CommentService;
@@ -29,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
 
+    @Cacheable("comments")
     @Override
     public List<CommentResponseDTO> getCommentsByPost(UUID postId) {
         return commentRepository.findByPostIdOrderByCreatedAtAsc(postId)
@@ -37,6 +42,10 @@ public class CommentServiceImpl implements CommentService {
                 .toList();
 
     }
+
+    @Caching(
+            evict =@CacheEvict(value = "comments",allEntries = true)
+    )
     @Transactional
     @Override
     public Comment createComment(UUID postId, String content) {
@@ -66,6 +75,7 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.save(comment);
     }
 
+    @CacheEvict(value = "comments",allEntries = true)
     @Override
     @Transactional
     public void deleteComment(UUID commentId, UUID userId) {

@@ -9,6 +9,10 @@ import com.projects.blog_application.repositories.TagRepository;
 import com.projects.blog_application.service.TagService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,6 +25,7 @@ public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
 
     //service method get all tags
+    @Cacheable("tags")
     @Override
     public List<TagResponseDTO> getAllTags() {
         return tagRepository.findAllTagWithPublishedPostCount();
@@ -28,6 +33,7 @@ public class TagServiceImpl implements TagService {
 
 
     //service method for get tag by id
+    @Cacheable(value = "tags_ids",key ="#id")
     @Override
     public Tag getTagById(UUID id) {
         return tagRepository.findById(id)
@@ -36,6 +42,10 @@ public class TagServiceImpl implements TagService {
 
 
     //service method for create tags
+    @CacheEvict(
+            value = "tags",
+            allEntries = true
+    )
     @Override
     @Transactional
     public List<Tag> createTags(Set<String> names) {
@@ -78,6 +88,12 @@ public class TagServiceImpl implements TagService {
     //service method for delete tag by id
     @Override
     @Transactional
+    @Caching(
+            evict = {
+                    @CacheEvict(value="tags_ids",key="#id"),
+                    @CacheEvict(value = "tags",allEntries = true)
+            }
+    )
     public void deleteTag(UUID id) {
 
         Tag tag = tagRepository.findById(id)

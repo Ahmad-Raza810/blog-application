@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardBody, Chip, Spinner, Button } from '@nextui-org/react';
 import { motion } from 'framer-motion';
 import { Calendar, User } from 'lucide-react';

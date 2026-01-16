@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button, Card, CardBody, CardFooter, Chip } from '@nextui-org/react';
 import { Sparkles, TrendingUp, ArrowRight, BookOpen, PenTool } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
-import { apiService, Post, Category, Tag as TagType, extractErrorMessage } from '../services/apiService';
+import { apiService, Post, Category, extractErrorMessage } from '../services/apiService';
 import { useAuth } from '../components/AuthContext';
-import { pageVariants, fadeIn, container, item } from '../utils/animation-utils';
+import { pageVariants, fadeIn, item } from '../utils/animation-utils';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -21,7 +21,7 @@ const HomePage: React.FC = () => {
   const [trendingPosts, setTrendingPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {

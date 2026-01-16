@@ -12,17 +12,16 @@ import {
   ModalFooter,
   useDisclosure
 } from '@nextui-org/react';
-import { BookOpen, Search, ArrowRight, Sparkles, Hash, TrendingUp, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
+import { BookOpen, Search, ArrowRight, Hash, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import { apiService, Category, extractErrorMessage } from '../services/apiService';
 import { useAuth } from '../components/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { pageVariants, container, item } from '../utils/animation-utils';
 
 interface CategoriesPageProps {
-  isAuthenticated?: boolean;
 }
 
-const CategoriesPage: React.FC<CategoriesPageProps> = ({ isAuthenticated }) => {
+const CategoriesPage: React.FC<CategoriesPageProps> = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user?.userRole === 'ADMIN';

@@ -81,13 +81,13 @@ const PostList: React.FC<PostListProps> = ({
                 {/* Image Section */}
                 <div className="md:w-2/5 h-48 md:h-full relative overflow-hidden">
                   <img
-                    src={post.coverImage || `https://source.unsplash.com/random/800x600?${post.categories?.[0]?.name || 'tech'}`}
+                    src={post.coverImage || `https://source.unsplash.com/random/800x600?${post.category?.name || 'tech'}`}
                     alt={post.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute top-4 left-4">
                     <span className="bg-white/90 dark:bg-secondary-900/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary-600 dark:text-primary-400 shadow-sm border border-secondary-100 dark:border-secondary-700">
-                      {post.categories?.[0]?.name || 'Article'}
+                      {post.category?.name || 'Article'}
                     </span>
                   </div>
                 </div>
@@ -122,7 +122,7 @@ const PostList: React.FC<PostListProps> = ({
                         <User size={16} className="text-secondary-500" />
                       </div>
                       <span className="text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                        {post.authorName}
+                        {post.author?.name}
                       </span>
                     </div>
 
