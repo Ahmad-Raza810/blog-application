@@ -10,9 +10,7 @@ import {
     Heart,
     Zap,
     Shield,
-    Globe,
-    PenTool,
-    ArrowRight
+    Globe
 } from 'lucide-react';
 import { pageVariants, fadeIn, container, item } from '../utils/animation-utils';
 
@@ -109,7 +107,7 @@ const AboutPage: React.FC = () => {
 
             {/* Stats Section */}
             <motion.section variants={container} className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {stats.map((stat, index) => {
+                {stats.map((stat) => {
                     const Icon = stat.icon;
                     return (
                         <motion.div key={stat.label} variants={item}>
