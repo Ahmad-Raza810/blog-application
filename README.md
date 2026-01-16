@@ -55,7 +55,7 @@ Ensure you have the following installed:
 Create a MySQL database for the application. You can use your preferred SQL client or command line:
 
 ```sql
-CREATE DATABASE blog;
+CREATE DATABASE blog_test;
 ```
 
 *Note: The application is configured to use `blog_user` with password `changemeinprod!`. You can update these in `src/main/resources/application.properties` or create a user with these credentials.*
