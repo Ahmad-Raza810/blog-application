@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { apiService, Category, Tag, Post } from '../services/apiService';
+import { apiService, Category, Tag, PostStatus } from '../services/apiService';
 import { Input, Button, Select, SelectItem, Chip, Spinner } from '@nextui-org/react';
 import { Save, X, Image as ImageIcon, Type, Hash, BookOpen } from 'lucide-react';
 
@@ -81,9 +81,9 @@ const PostForm: React.FC<PostFormProps> = ({ postId }) => {
       };
 
       if (postId) {
-        await apiService.updatePost(postId, postData);
+        await apiService.updatePost({ ...postData, id: postId, status: PostStatus.PUBLISHED });
       } else {
-        await apiService.createPost(postData);
+        await apiService.createPost({ ...postData, status: PostStatus.PUBLISHED });
       }
       navigate('/');
     } catch (err: any) {
