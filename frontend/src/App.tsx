@@ -41,7 +41,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
+  useAuth();
 
   return (
     <BrowserRouter>
@@ -76,8 +76,8 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/categories" element={<CategoriesPage isAuthenticated={isAuthenticated} />} />
-            <Route path="/tags" element={<TagsPage isAuthenticated={isAuthenticated} />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/tags" element={<TagsPage />} />
             <Route
               path="/posts/drafts"
               element={
