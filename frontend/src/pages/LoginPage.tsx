@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { Card, CardBody, CardHeader, Input, Button, Divider } from '@nextui-org/react';
-import { Mail, Lock, LogIn, ArrowRight, Sparkles } from 'lucide-react';
+import { Mail, Lock, LogIn, ArrowRight, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fadeIn } from '../utils/animation-utils';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated } = useAuth();
@@ -45,6 +46,8 @@ const LoginPage: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  const togglePasswordVisibility = () => setIsPasswordVisible(!isPasswordVisible);
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center relative overflow-hidden px-4">
@@ -101,13 +104,22 @@ const LoginPage: React.FC = () => {
 
               <div className="flex flex-col gap-2">
                 <Input
-                  type="password"
+                  type={isPasswordVisible ? "text" : "password"}
                   label="Password"
                   placeholder="Enter your password"
                   value={password}
                   onValueChange={setPassword}
                   isRequired
                   startContent={<Lock className="text-secondary-400 pointer-events-none flex-shrink-0" size={18} />}
+                  endContent={
+                    <button className="focus:outline-none" type="button" onClick={togglePasswordVisibility}>
+                      {isPasswordVisible ? (
+                        <EyeOff className="text-secondary-400" size={18} />
+                      ) : (
+                        <Eye className="text-secondary-400" size={18} />
+                      )}
+                    </button>
+                  }
                   variant="bordered"
                   radius="lg"
                   classNames={{
