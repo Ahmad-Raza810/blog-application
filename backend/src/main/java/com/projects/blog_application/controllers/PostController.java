@@ -8,12 +8,17 @@ import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.mapper.PostMapper;
 import com.projects.blog_application.response.ApiResponse;
 import com.projects.blog_application.service.PostService;
+import com.projects.blog_application.service.FileStorageService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +31,10 @@ public class PostController {
 
     private final PostService postService;
     private final PostMapper postMapper;
+    private final FileStorageService fileStorageService;
+    private final ObjectMapper objectMapper;
+
+
 
 
     //endpoint for get all posts
@@ -93,6 +102,37 @@ public class PostController {
     }
 
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<ApiResponse<PostResponseDTO>> createPostMultipart(
+                @RequestPart("data") String data,
+                @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
+                @RequestAttribute("id") UUID userId
+        ) throws Exception {
+
+        CreatePostDTO requestDTO = objectMapper.readValue(data, CreatePostDTO.class);
+
+        if (coverImage != null && !coverImage.isEmpty()) {
+                String coverUrl = fileStorageService.storePostCover(coverImage);
+                requestDTO.setCoverImage(coverUrl);
+        }
+
+        Post savedPost = postService.createPost(requestDTO, userId);
+        PostResponseDTO dto = postMapper.toDto(savedPost);
+
+        ApiResponse<PostResponseDTO> response = new ApiResponse<>(
+                "Post created successfully.",
+                dto,
+                HttpStatus.CREATED.value(),
+                true,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+
+
+
+
     //endpoint for get post by id (public)
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PostResponseDTO>> getPostById(@PathVariable UUID id) {
@@ -147,6 +187,37 @@ public class PostController {
 
         return ResponseEntity.ok(response);
     }
+
+
+        @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<ApiResponse<PostResponseDTO>> updatePostMultipart(
+                        @RequestPart("data") String data,
+                        @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
+                        @RequestAttribute("id") UUID userId
+                ) throws Exception {
+
+                PostUpdateDTO postUpdateDTO = objectMapper.readValue(data, PostUpdateDTO.class);
+
+                if (coverImage != null && !coverImage.isEmpty()) {
+                        String coverUrl = fileStorageService.storePostCover(coverImage);
+                        postUpdateDTO.setCoverImage(coverUrl);
+                }
+
+                Post updatedPost = postService.updatePost(postUpdateDTO.getId(), postUpdateDTO, userId);
+                PostResponseDTO dto = postMapper.toDto(updatedPost);
+
+                ApiResponse<PostResponseDTO> response = new ApiResponse<>(
+                        "Post updated successfully.",
+                        dto,
+                        HttpStatus.OK.value(),
+                        true,
+                        LocalDateTime.now()
+                );
+
+                return ResponseEntity.ok(response);
+                }
+
+
 
     //api endpoint for get all post of a user
     @GetMapping("/user")

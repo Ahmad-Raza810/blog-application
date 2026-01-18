@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService, PostStatus } from '../services/apiService';
 import { Button, Input, Card, CardBody, Select, SelectItem, Chip, Switch } from '@nextui-org/react';
@@ -42,6 +42,10 @@ const EditPostPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [availableTags, setAvailableTags] = useState<{ id: string; name: string }[]>([]);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
 
   const editor = useEditor({
     extensions: [
@@ -54,6 +58,28 @@ const EditPostPage: React.FC = () => {
       },
     },
   });
+
+  const handleCoverPick = (file: File | null) => {
+    setCoverFile(file);
+
+    if (coverPreview) {
+      URL.revokeObjectURL(coverPreview);
+    }
+
+    if (file) {
+      setCoverPreview(URL.createObjectURL(file));
+    } else {
+      setCoverPreview(null);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (coverPreview) URL.revokeObjectURL(coverPreview);
+    };
+  }, [coverPreview]);
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +97,10 @@ const EditPostPage: React.FC = () => {
           editor?.commands.setContent(post.content);
           setCategoryId(post.category.id);
           setTags(new Set(post.tags.map(t => t.id)));
+          if (post.coverImage) {
+            setCoverPreview(post.coverImage);
+            setCoverFile(null); 
+          }
           // setStatus(post.status);
         }
       } catch (error) {
@@ -91,33 +121,44 @@ const EditPostPage: React.FC = () => {
 
 
   const handleSubmit = async () => {
-    if (!editor) return;
+  if (!editor) return;
 
-    setLoading(true);
-    const content = editor.getHTML();
+  setLoading(true);
+  const content = editor.getHTML();
 
-    try {
-      const postData = {
-        title,
-        content,
-        categoryId,
-        tagIds: Array.from(tags),
-        status
-      };
+  try {
+    const postData = {
+      title,
+      content,
+      categoryId,
+      tagIds: Array.from(tags),
+      status
+    };
 
-      if (isEditing && id) {
-        await apiService.updatePost({ ...postData, id });
-      } else {
-        await apiService.createPost(postData);
-      }
-      navigate('/');
-    } catch (error) {
-      console.error('Failed to save post', error);
-      alert('Failed to save post');
-    } finally {
-      setLoading(false);
+    const payload = isEditing && id ? { ...postData, id } : postData;
+
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(payload)); // ✅ STRING (da se vidi u View decoded)
+
+    if (coverFile) {
+      formData.append("coverImage", coverFile);
     }
-  };
+
+    if (isEditing && id) {
+      await apiService.updatePost(formData);
+    } else {
+      await apiService.createPost(formData);
+    }
+
+    navigate('/');
+  } catch (error) {
+    console.error('Failed to save post', error);
+    alert('Failed to save post');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <motion.div
@@ -222,13 +263,38 @@ const EditPostPage: React.FC = () => {
 
           <Card className="glass-panel border-default-200 shadow-sm p-4">
             <h3 className="font-semibold mb-4 text-default-500 text-sm uppercase tracking-wider">Cover Image</h3>
-            <div className="border-2 border-dashed border-default-300 rounded-xl h-40 flex flex-col items-center justify-center text-default-400 hover:bg-default-50 transition-colors cursor-pointer group">
-              <div className="w-12 h-12 rounded-full bg-default-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <ImageIcon size={24} />
-              </div>
-              <span className="text-xs font-medium">Click to upload or drag & drop</span>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => handleCoverPick(e.target.files?.[0] ?? null)}
+            />
+
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-default-300 rounded-xl h-40 flex flex-col items-center justify-center text-default-400 hover:bg-default-50 transition-colors cursor-pointer group overflow-hidden"
+            >
+              {coverPreview ? (
+                <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-default-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                    <ImageIcon size={24} />
+                  </div>
+                  <span className="text-xs font-medium">Click to upload</span>
+                </>
+              )}
             </div>
+
+            {coverFile && (
+              <div className="mt-2 text-xs text-default-500 truncate">
+                Selected: {coverFile.name}
+              </div>
+            )}
           </Card>
+
         </div>
       </div>
     </motion.div>

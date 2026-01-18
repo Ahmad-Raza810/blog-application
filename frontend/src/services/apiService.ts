@@ -357,15 +357,34 @@ class ApiService {
     return response.data.data; // ✅ inner data
   }
 
-  public async createPost(post: CreatePostRequest): Promise<Post> {
-    const response: AxiosResponse<Post> = await this.api.post('/posts', post);
-    return response.data;
+  public async createPost(post: CreatePostRequest | FormData): Promise<Post> {
+    const isFormData = post instanceof FormData;
+
+    const response = await this.api.post(
+      '/posts',
+      post,
+      isFormData
+        ? { headers: { 'Content-Type': undefined as any } } // let browser set boundary
+        : undefined
+    );
+
+    return response.data.data ?? response.data;
   }
 
-  public async updatePost(post: UpdatePostRequest): Promise<Post> {
-    const response: AxiosResponse<{ message: string; data: Post; status: number; success: boolean; dateTime: string }> = await this.api.put('/posts', post);
-    return response.data.data; // Extract post from ApiResponse wrapper
+  public async updatePost(post: UpdatePostRequest | FormData): Promise<Post> {
+    const isFormData = post instanceof FormData;
+
+    const response = await this.api.put(
+      '/posts',
+      post,
+      isFormData
+        ? { headers: { 'Content-Type': undefined as any } }
+        : undefined
+    );
+
+    return response.data.data ?? response.data;
   }
+
 
   public async deletePost(id: string): Promise<void> {
     await this.api.delete(`/posts/${id}`);
