@@ -41,4 +41,7 @@ public class CreatePostDTO {
 
     @NotNull(message = "Status is required")
     private PostStatus status;
+
+    private String coverImage;
+
 }

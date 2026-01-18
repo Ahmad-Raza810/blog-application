@@ -158,6 +158,7 @@ const PostPage: React.FC = () => {
       </motion.header>
 
       {/* Cover Image */}
+      
       {post.coverImage && (
         <motion.div
           className="mb-12 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-secondary-900/5 aspect-video"
@@ -165,13 +166,23 @@ const PostPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <img
-            src={post.coverImage}
-            alt={post.title}
-            className="w-full h-full object-cover"
-          />
+          {(() => {
+            const coverSrc =
+              post.coverImage.startsWith("http")
+                ? post.coverImage
+                : `http://localhost:8080${post.coverImage}`;
+
+            return (
+              <img
+                src={coverSrc}
+                alt={post.title}
+                className="w-full h-full object-cover"
+              />
+            );
+          })()}
         </motion.div>
       )}
+
 
       {/* Main Content (No Sidebar) */}
       <div className="max-w-none mb-12">

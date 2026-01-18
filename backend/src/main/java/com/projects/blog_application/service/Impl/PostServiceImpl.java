@@ -150,6 +150,7 @@ public class PostServiceImpl implements PostService {
                 .postStatus(createPostDTO.getStatus())
                 .author(loggedInUser)
                 .readingTime(calculateReadTime(createPostDTO.getContent()))
+                .coverImage(createPostDTO.getCoverImage())
                 .build();
 
         return postRepository.save(post);
@@ -185,19 +186,37 @@ public class PostServiceImpl implements PostService {
         existingPost.setContent(postContent);
         existingPost.setPostStatus(postUpdateDTO.getStatus());
         existingPost.setReadingTime(calculateReadTime(postContent));
+        
+        if (postUpdateDTO.getCoverImage() != null && !postUpdateDTO.getCoverImage().isBlank()) {
+            existingPost.setCoverImage(postUpdateDTO.getCoverImage());
+        }
+
+
 
         UUID updatePostRequestCategoryId = postUpdateDTO.getCategoryId();
-        if (!existingPost.getCategory().getId().equals(updatePostRequestCategoryId)) {
+        if (updatePostRequestCategoryId != null &&
+                !existingPost.getCategory().getId().equals(updatePostRequestCategoryId)) {
             Category newCategory = categoryService.getCategoryById(updatePostRequestCategoryId);
             existingPost.setCategory(newCategory);
         }
 
-        Set<UUID> existingTagIds = existingPost.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
-        Set<UUID> updatePostRequestTagIds = postUpdateDTO.getTagIds();
+
+        Set<UUID> updatePostRequestTagIds =
+        postUpdateDTO.getTagIds() == null ? Collections.emptySet() : postUpdateDTO.getTagIds();
+
+        Set<UUID> existingTagIds = existingPost.getTags()
+                .stream()
+                .map(Tag::getId)
+                .collect(Collectors.toSet());
+
         if (!existingTagIds.equals(updatePostRequestTagIds)) {
-            List<Tag> newTags = tagService.getTagIds(updatePostRequestTagIds);
+            List<Tag> newTags = updatePostRequestTagIds.isEmpty()
+                    ? Collections.emptyList()
+                    : tagService.getTagIds(updatePostRequestTagIds);
+
             existingPost.setTags(new HashSet<>(newTags));
         }
+
 
         return postRepository.save(existingPost);
     }

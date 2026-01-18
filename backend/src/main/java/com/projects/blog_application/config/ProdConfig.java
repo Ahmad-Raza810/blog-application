@@ -40,6 +40,7 @@ public class ProdConfig {
 
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/v1/posts/*").authenticated()
+                .requestMatchers("/uploads/**").permitAll()
 
 
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/user").authenticated()

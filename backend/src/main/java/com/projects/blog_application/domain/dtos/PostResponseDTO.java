@@ -24,5 +24,7 @@ public class PostResponseDTO {
     private Set<TagDTO> tags;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String coverImage;
+
 
 }
