@@ -8,14 +8,13 @@ import com.projects.blog_application.domain.entities.Category;
 import com.projects.blog_application.domain.entities.Post;
 import com.projects.blog_application.domain.entities.Tag;
 import com.projects.blog_application.domain.entities.User;
+import com.projects.blog_application.exception.CommentsAvailableException;
 import com.projects.blog_application.exception.NotAllowedOperationException;
 import com.projects.blog_application.exception.ResourceNotFoundException;
 import com.projects.blog_application.mapper.PostMapper;
+import com.projects.blog_application.repositories.CommentRepository;
 import com.projects.blog_application.repositories.PostRepository;
-import com.projects.blog_application.service.CategoryService;
-import com.projects.blog_application.service.PostService;
-import com.projects.blog_application.service.TagService;
-import com.projects.blog_application.service.UserService;
+import com.projects.blog_application.service.*;
 import com.projects.blog_application.util.CursorDecoder;
 import com.projects.blog_application.util.CursorEncoder;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +41,7 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
     private final PostMapper postMapper;
     private final static int WORD_PER_MINUTE = 200;
+    private final CommentService commentService;
 
 
     //service method for get all post
@@ -50,14 +50,14 @@ public class PostServiceImpl implements PostService {
     @Cacheable("posts")
     public PageResponse getAllPosts(int pageSize, String cursor, UUID categoryId) {
 
-        pageSize = Math.min(pageSize, 60);
+        pageSize = Math.min(pageSize, 20);
         Pageable pageable = PageRequest.of(0, pageSize + 1);
 
         List<Post> posts;
         if (cursor == null && categoryId == null) {
 
             posts = postRepository
-                    .findByPostStatusOrderByCreatedAtDesc(pageable,PostStatus.PUBLISHED);
+                    .findByPostStatusOrderByCreatedAtDesc(pageable, PostStatus.PUBLISHED);
 
         } else if (cursor == null) {
 
@@ -130,13 +130,13 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     @Caching(
-            put = @CachePut(value = "posts_ids",key="#result.id"),
-            evict = @CacheEvict(value = "posts",allEntries = true)
+            put = @CachePut(value = "posts_ids", key = "#result.id"),
+            evict = @CacheEvict(value = "posts", allEntries = true)
     )
     public Post createPost(CreatePostDTO createPostDTO, UUID userId) {
 
         User loggedInUser = userService.getUserById(userId);
-        List<Tag> tags=new ArrayList<>();
+        List<Tag> tags = new ArrayList<>();
         if (!createPostDTO.getTagIds().isEmpty()) {
             tags = tagService.getTagIds(createPostDTO.getTagIds());
         }
@@ -167,8 +167,8 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     @Caching(
-            put = @CachePut(value = "posts_ids",key="#result.id"),
-            evict = @CacheEvict(value = "posts",allEntries = true)
+            put = @CachePut(value = "posts_ids", key = "#result.id"),
+            evict = @CacheEvict(value = "posts", allEntries = true)
     )
     public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO, UUID userId) {
 
@@ -214,15 +214,19 @@ public class PostServiceImpl implements PostService {
     //service method for delete a post
     @Caching(
             evict = {
-                    @CacheEvict(value = "posts",allEntries = true),
-                    @CacheEvict(value = "posts_ids",key="#postId")
+                    @CacheEvict(value = "posts", allEntries = true),
+                    @CacheEvict(value = "posts_ids", key = "#postId")
             }
     )
     @Override
-    public void deletePost(UUID postId,UUID userId) {
-        Post post=getPost(postId);
+    public void deletePost(UUID postId, UUID userId) {
+        Post post = getPost(postId);
         if (!post.getAuthor().getId().equals(userId)) {
             throw new NotAllowedOperationException("You do not have permission to delete this post.");
+        }
+
+        if (!commentService.getCommentsByPost(postId).isEmpty()) {
+            throw new CommentsAvailableException("post can't be deleted because it contains comment.");
         }
         postRepository.delete(post);
     }
@@ -247,7 +251,7 @@ public class PostServiceImpl implements PostService {
     @Cacheable("trending_post")
     @Override
     public List<Post> getTrendingPosts() {
-        List<Post> trendingPosts=postRepository.findTByIsTrendingTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
+        List<Post> trendingPosts = postRepository.findTByIsTrendingTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
         Collections.shuffle(trendingPosts);
         return trendingPosts.stream().limit(5).toList();
     }

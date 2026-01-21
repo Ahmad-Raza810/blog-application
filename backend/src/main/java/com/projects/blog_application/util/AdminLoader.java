@@ -14,7 +14,6 @@ import java.util.List;
 @Component
 public class AdminLoader implements CommandLineRunner {
 
-
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -46,7 +45,6 @@ public class AdminLoader implements CommandLineRunner {
         } else {
             System.out.println("Admin already exists.");
         }
-
 
     }
 }

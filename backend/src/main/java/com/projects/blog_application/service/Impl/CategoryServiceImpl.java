@@ -33,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 
     //service method for get category by id
-    @Cacheable(value = "categories_ids",key = "#id")
+    @Cacheable(value = "categories_ids", key = "#id")
     @Override
     public Category getCategoryById(UUID id) {
         return categoryRepository.findById(id)
@@ -44,32 +44,32 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     @Caching(
-            put = @CachePut(value="categories_ids",key="#result.id"),
-            evict=@CacheEvict(value = "categories",allEntries = true)
+            put = @CachePut(value = "categories_ids", key = "#result.id"),
+            evict = @CacheEvict(value = "categories", allEntries = true)
     )
     public Category createCategory(Category category) {
-        if ( categoryRepository.existsByName(category.getName())) {
-           throw new ResourceAlreadyExistsException("category with name '" + category.getName() + "'  already exists.");
+        if (categoryRepository.existsByName(category.getName())) {
+            throw new ResourceAlreadyExistsException("category with name '" + category.getName() + "'  already exists.");
         }
-       return categoryRepository.save(category);
+        return categoryRepository.save(category);
 
     }
 
     //service method for delete a category
     @Caching(
-            evict ={
-                    @CacheEvict(value="categories_ids",key="#id"),
-                    @CacheEvict(value = "categories",allEntries = true)
+            evict = {
+                    @CacheEvict(value = "categories_ids", key = "#id"),
+                    @CacheEvict(value = "categories", allEntries = true)
             }
     )
     @Override
     @Transactional
     public void deleteCategory(UUID id) {
-        Category category=categoryRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("category with id '" + id + "'  not exists."));
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("category with id '" + id + "'  not exists."));
 
-        if (category.getPosts()!=null && !category.getPosts().isEmpty()) {
-            throw  new PostAvailableException("category has posts so it can't be deleted.");
+        if (category.getPosts() != null && !category.getPosts().isEmpty()) {
+            throw new PostAvailableException("category has posts so it can't be deleted.");
         }
         categoryRepository.deleteById(id);
 
