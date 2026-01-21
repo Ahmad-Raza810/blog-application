@@ -116,28 +116,47 @@ const ProfilePage: React.FC = () => {
       variants={pageVariants}
     >
       {/* Profile Header */}
-      <div className="relative mb-24">
-        <div className="h-48 rounded-3xl bg-gradient-hero shadow-lg" />
-        <div className="absolute -bottom-16 left-8 flex items-end gap-6">
-          <Avatar
-            src={undefined}
-            name={user.name}
-            className="w-32 h-32 text-3xl border-4 border-white dark:border-slate-900 shadow-xl"
-            color="primary"
-            isBordered
-          />
-          <div className="mb-4">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{user.name}</h1>
-            <p className="text-slate-500 dark:text-slate-400">{user.email}</p>
-          </div>
+      <div className="relative mb-32">
+        <div className="h-48 md:h-64 rounded-3xl bg-gradient-hero shadow-lg overflow-hidden relative">
+          {/* Decorative Blobs for Header */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
         </div>
-        <div className="absolute bottom-4 right-8 flex gap-3">
-          <Button variant="flat" color="primary" startContent={<Settings size={18} />}>
-            Edit Profile
-          </Button>
-          <Button color="danger" variant="flat" startContent={<LogOut size={18} />} onPress={logout}>
-            Log Out
-          </Button>
+
+        <div className="absolute -bottom-20 left-4 md:left-8 right-4 md:right-8 flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
+            <Avatar
+              src={user.avatar}
+              name={user.name}
+              className="w-32 h-32 md:w-40 md:h-40 text-3xl border-4 border-white dark:border-slate-900 shadow-xl"
+              color="primary"
+              isBordered
+            />
+            <div className="mb-4 space-y-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{user.name}</h1>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">{user.email}</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 mb-4">
+            <Button
+              variant="solid"
+              color="primary"
+              className="shadow-md font-semibold"
+              startContent={<Settings size={18} />}
+            >
+              Edit Profile
+            </Button>
+            <Button
+              color="danger"
+              variant="flat"
+              className="shadow-sm font-semibold"
+              startContent={<LogOut size={18} />}
+              onPress={logout}
+            >
+              Log Out
+            </Button>
+          </div>
         </div>
       </div>
 
