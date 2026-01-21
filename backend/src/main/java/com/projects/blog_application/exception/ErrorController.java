@@ -170,6 +170,20 @@ public class ErrorController {
     }
 
 
+    //comments available on post  handler
+    @ExceptionHandler(CommentsAvailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleCommentsAvailable(
+            CommentsAvailableException exception
+    ) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(exception.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+
     //handler for any other exception
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> generalHandler(Exception exception) {

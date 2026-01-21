@@ -32,12 +32,12 @@ public class PostController {
     @GetMapping
     @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<PageResponse>> getAllPosts(
-            @RequestParam(required = false,defaultValue ="5")int pageSize,
+            @RequestParam(required = false, defaultValue = "5") int pageSize,
             @RequestParam(required = false) String cursor,
             @RequestParam(required = false) UUID categoryId
-            ) {
+    ) {
 
-        PageResponse pageResponse=postService.getAllPosts(pageSize,cursor,categoryId);
+        PageResponse pageResponse = postService.getAllPosts(pageSize, cursor, categoryId);
 
         ApiResponse<PageResponse> response = new ApiResponse<>(
                 "Posts fetched successfully.",
@@ -113,8 +113,8 @@ public class PostController {
 
     //endpoint for delete  post by id (for authenticated user only)
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable("id") UUID postId,@RequestAttribute("id") UUID userId) {
-        postService.deletePost(postId,userId);
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable("id") UUID postId, @RequestAttribute("id") UUID userId) {
+        postService.deletePost(postId, userId);
 
         ApiResponse<Void> response = new ApiResponse<>(
                 "Post deleted successfully.",
