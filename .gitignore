@@ -29,6 +29,7 @@ backend/mvnw.cmd
 backend/HELP.md
 backend/.vscode
 backend/blog-application.iml
+backend/upload
 
 # =========================
 # FRONTEND: React + Vite
