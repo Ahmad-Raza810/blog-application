@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { apiService, PostStatus } from '../services/apiService';
+import { apiService, PostStatus, extractValidationErrors, extractErrorMessage } from '../services/apiService';
 import { Button, Input, Card, CardBody, Select, SelectItem, Chip, Switch } from '@nextui-org/react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Save, ArrowLeft, Image as ImageIcon, Type, Sparkles } from 'lucide-react';
+import { Save, ArrowLeft, Image as ImageIcon, Type, Sparkles, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fadeIn } from '../utils/animation-utils';
 
@@ -42,6 +42,10 @@ const EditPostPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [availableTags, setAvailableTags] = useState<{ id: string; name: string }[]>([]);
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [existingCoverUrl, setExistingCoverUrl] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -85,14 +89,72 @@ const EditPostPage: React.FC = () => {
     if (editor && !editor.getText() && isEditing && id) {
       apiService.getPost(id).then(post => {
         editor.commands.setContent(post.content);
+        // Also set other fields if not already set strictly by the Promise.all
+        setTitle(post.title);
+        setCategoryId(post.category.id);
+        setTags(new Set(post.tags.map(t => t.id)));
+        setExistingCoverUrl(post.coverImageUrl || null);
       });
     }
   }, [editor, isEditing, id]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+
+  const [errors, setErrors] = useState<{ title?: string; categoryId?: string; content?: string }>({});
+
+  const validateForm = () => {
+    const newErrors: { title?: string; categoryId?: string; content?: string } = {};
+    let isValid = true;
+
+    // Title Validation
+    if (!title.trim()) {
+      newErrors.title = 'Title is required.';
+      isValid = false;
+    } else if (title.length < 10 || title.length > 200) {
+      newErrors.title = 'Length of title should be in between 10 and 200';
+      isValid = false;
+    } else if (!/^[\w\s\-\.\p{So}]+$/u.test(title)) {
+      newErrors.title = 'Title can include letters, numbers, spaces, hyphens, underscores, full stops, and emojis.';
+      isValid = false;
+    }
+
+    // Category Validation
+    if (!categoryId) {
+      newErrors.categoryId = 'Category ID is required';
+      isValid = false;
+    }
+
+    // Content Validation
+    const contentText = editor?.getText() || '';
+    if (!contentText.trim()) {
+      newErrors.content = 'Content is required.';
+      isValid = false;
+    } else if (contentText.length < 20 || contentText.length > 2000) {
+      newErrors.content = 'Length of content should be in between 20 and 2000';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async () => {
     if (!editor) return;
 
+    if (!validateForm()) {
+      return;
+    }
+
+    // Reset errors before submission
+    setErrors({});
     setLoading(true);
     const content = editor.getHTML();
 
@@ -106,14 +168,25 @@ const EditPostPage: React.FC = () => {
       };
 
       if (isEditing && id) {
-        await apiService.updatePost({ ...postData, id });
+        await apiService.updatePost({ ...postData, id }, selectedFile || undefined);
       } else {
-        await apiService.createPost(postData);
+        await apiService.createPost(postData, selectedFile || undefined);
       }
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save post', error);
-      alert('Failed to save post');
+
+      // Extract validation errors from backend response
+      const validationErrors = extractValidationErrors(error);
+      if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors as any);
+      }
+
+      // Show global error message if available
+      const message = extractErrorMessage(error, 'Failed to save post');
+      if (message && Object.keys(validationErrors).length === 0) {
+        alert(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -156,7 +229,12 @@ const EditPostPage: React.FC = () => {
                 variant="flat"
                 placeholder="Post Title"
                 value={title}
-                onValueChange={setTitle}
+                onValueChange={(val) => {
+                  setTitle(val);
+                  if (errors.title) setErrors({ ...errors, title: undefined });
+                }}
+                isInvalid={!!errors.title}
+                errorMessage={errors.title}
                 classNames={{
                   input: "text-3xl font-display font-bold",
                   inputWrapper: "bg-transparent shadow-none border-b border-default-100 rounded-none h-auto py-6 px-6"
@@ -164,6 +242,9 @@ const EditPostPage: React.FC = () => {
               />
               <MenuBar editor={editor} />
               <EditorContent editor={editor} className="min-h-[500px]" />
+              {errors.content && (
+                <div className="px-6 pb-4 text-sm text-danger">{errors.content}</div>
+              )}
             </CardBody>
           </Card>
         </div>
@@ -177,8 +258,13 @@ const EditPostPage: React.FC = () => {
                 label="Category"
                 placeholder="Select a category"
                 selectedKeys={categoryId ? [categoryId] : []}
-                onChange={(e) => setCategoryId(e.target.value)}
+                onChange={(e) => {
+                  setCategoryId(e.target.value);
+                  if (errors.categoryId) setErrors({ ...errors, categoryId: undefined });
+                }}
                 variant="bordered"
+                isInvalid={!!errors.categoryId}
+                errorMessage={errors.categoryId}
               >
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
@@ -209,24 +295,78 @@ const EditPostPage: React.FC = () => {
                 ))}
               </Select>
 
-              <div className="flex items-center justify-between py-2 px-1">
-                <span className="text-sm font-medium">Publish Immediately</span>
-                <Switch
-                  isSelected={status === PostStatus.PUBLISHED}
-                  onValueChange={(val) => setStatus(val ? PostStatus.PUBLISHED : PostStatus.DRAFT)}
-                  size="sm"
-                />
-              </div>
+              <Select
+                label="Status"
+                selectedKeys={[status]}
+                onChange={(e) => setStatus(e.target.value as PostStatus)}
+                variant="bordered"
+                disallowEmptySelection
+              >
+                <SelectItem key={PostStatus.DRAFT} value={PostStatus.DRAFT}>
+                  Draft
+                </SelectItem>
+                <SelectItem key={PostStatus.PUBLISHED} value={PostStatus.PUBLISHED}>
+                  Published
+                </SelectItem>
+              </Select>
             </div>
           </Card>
 
           <Card className="glass-panel border-default-200 shadow-sm p-4">
             <h3 className="font-semibold mb-4 text-default-500 text-sm uppercase tracking-wider">Cover Image</h3>
-            <div className="border-2 border-dashed border-default-300 rounded-xl h-40 flex flex-col items-center justify-center text-default-400 hover:bg-default-50 transition-colors cursor-pointer group">
-              <div className="w-12 h-12 rounded-full bg-default-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <ImageIcon size={24} />
-              </div>
-              <span className="text-xs font-medium">Click to upload or drag & drop</span>
+            <div className="flex flex-col gap-4">
+              <input
+                type="file"
+                id="cover-upload"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+
+              {(previewUrl || existingCoverUrl) ? (
+                <div className="relative rounded-xl overflow-hidden border border-default-200 aspect-video group">
+                  <img
+                    src={previewUrl || existingCoverUrl || ''}
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <Button
+                      as="label"
+                      htmlFor="cover-upload"
+                      size="sm"
+                      variant="flat"
+                      className="text-white bg-white/20 backdrop-blur-md"
+                    >
+                      Change
+                    </Button>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      variant="flat"
+                      onPress={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                        setExistingCoverUrl(null);
+                      }}
+                      className="bg-white/20 backdrop-blur-md text-white"
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <label
+                  htmlFor="cover-upload"
+                  className="border-2 border-dashed border-default-300 rounded-xl h-40 flex flex-col items-center justify-center text-default-400 hover:bg-default-50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-default-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                    <ImageIcon size={24} />
+                  </div>
+                  <span className="text-xs font-medium">Click to upload or drag & drop</span>
+                </label>
+              )}
             </div>
           </Card>
         </div>

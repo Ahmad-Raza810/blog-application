@@ -93,7 +93,7 @@ const TrendingPage: React.FC = () => {
                                     {/* Image */}
                                     <div className="w-full md:w-64 h-48 md:h-40 rounded-2xl overflow-hidden flex-shrink-0 relative">
                                         <img
-                                            src={(post as any).coverImage || `https://source.unsplash.com/random/800x600?${post.category?.name || 'trending'}&sig=${index}`}
+                                            src={post.coverImageUrl || `https://source.unsplash.com/random/800x600?${post.category?.name || 'trending'}&sig=${index}`}
                                             alt={post.title}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         />

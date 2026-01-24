@@ -158,7 +158,7 @@ const PostPage: React.FC = () => {
       </motion.header>
 
       {/* Cover Image */}
-      {post.coverImage && (
+      {post.coverImageUrl && (
         <motion.div
           className="mb-12 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-secondary-900/5 aspect-video"
           initial={{ opacity: 0, y: 20 }}
@@ -166,7 +166,7 @@ const PostPage: React.FC = () => {
           transition={{ delay: 0.2 }}
         >
           <img
-            src={post.coverImage}
+            src={post.coverImageUrl}
             alt={post.title}
             className="w-full h-full object-cover"
           />

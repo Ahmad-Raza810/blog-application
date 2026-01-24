@@ -29,7 +29,7 @@ const BlogCard = React.memo(({ post, index, onPostClick }: { post: Post; index: 
                         {/* Image */}
                         <div className="md:col-span-1 h-72 md:h-auto overflow-hidden">
                             <img
-                                src={(post as any).coverImage || `https://source.unsplash.com/random/800x600?${post.category?.name || 'blog'}`}
+                                src={post.coverImageUrl || `https://source.unsplash.com/random/800x600?${post.category?.name || 'blog'}`}
                                 alt={post.title}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 loading="lazy"

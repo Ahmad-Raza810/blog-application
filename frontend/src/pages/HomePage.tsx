@@ -144,7 +144,7 @@ const HomePage: React.FC = () => {
                   <Card className="h-[400px] w-full border-none shadow-lg hover:shadow-xl transition-shadow group">
                     <div className="absolute inset-0">
                       <img
-                        src={(post as any).coverImage || `https://source.unsplash.com/random/800x600?${post.category?.name || 'blog'}`}
+                        src={post.coverImageUrl || `https://source.unsplash.com/random/800x600?${post.category?.name || 'blog'}`}
                         alt={post.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
@@ -246,7 +246,7 @@ const HomePage: React.FC = () => {
                 >
                   <div className="w-full sm:w-48 h-32 rounded-xl overflow-hidden flex-shrink-0">
                     <img
-                      src={(post as any).coverImage || `https://source.unsplash.com/random/400x300?${post.category?.name || 'article'}`}
+                      src={post.coverImageUrl || `https://source.unsplash.com/random/400x300?${post.category?.name || 'article'}`}
                       alt={post.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
@@ -283,7 +283,7 @@ const HomePage: React.FC = () => {
 
             <div className="space-y-6">
               {trendingPosts.map((post, index) => (
-                <Link key={post.id} to={`/posts/${post.id}`} className="group flex gap-4 items-start">
+                <Link key={`${post.id}-${index}`} to={`/posts/${post.id}`} className="group flex gap-4 items-start">
                   <span className="text-3xl font-bold text-secondary-200 dark:text-secondary-700 leading-none -mt-1 group-hover:text-primary-200 transition-colors">
                     {index + 1}
                   </span>
