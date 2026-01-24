@@ -12,18 +12,32 @@ import org.mapstruct.ReportingPolicy;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {CategoryMapper.class})
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = { CategoryMapper.class })
 public interface PostMapper {
-
 
     @Mapping(target = "author", source = "author")
     @Mapping(target = "category", source = "category")
     @Mapping(target = "tags", qualifiedByName = "mapTags")
+    @Mapping(target = "coverImageUrl", qualifiedByName = "mapCoverImage")
     PostResponseDTO toDto(Post post);
+
+    @Named("mapCoverImage")
+    default String mapCoverImage(String coverImageUrl) {
+        if (coverImageUrl == null || coverImageUrl.isEmpty()) {
+            return null;
+        }
+        // If it's already a full URL (legacy or external), leave it, otherwise prepend
+        // /images/
+        if (coverImageUrl.startsWith("http")) {
+            return coverImageUrl;
+        }
+        return "http://localhost:8080/images/" + coverImageUrl;
+    }
 
     @Named("mapTags")
     default Set<TagDTO> mapTags(Set<Tag> tags) {
-        if (tags == null) return null;
+        if (tags == null)
+            return null;
 
         return tags.stream()
                 .map(tag -> new TagDTO(tag.getId(), tag.getName()))

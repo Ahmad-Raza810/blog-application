@@ -12,6 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -181,6 +182,47 @@ public class ErrorController {
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    //handler for any RuntimeException
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiErrorResponse> runtimeHandler(RuntimeException exception) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message(exception.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    //handler for FileValidationException
+    @ExceptionHandler(FileValidationException.class)
+    public ResponseEntity<ApiErrorResponse> handleFileValidation(
+            FileValidationException exception) {
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    //handler for MaxUploadSizeExceededException
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleMaxSizeException(
+            MaxUploadSizeExceededException exception) {
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .message("File size exceeds the maximum allowed limit is 2MB.")
+                .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(response);
     }
 
 
