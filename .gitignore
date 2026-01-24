@@ -14,7 +14,7 @@
 # IDE / Editor
 # =========================
 .idea/
-target
+target/
 *.iml
 .vscode/*
 !.vscode/extensions.json
@@ -29,7 +29,8 @@ backend/mvnw.cmd
 backend/HELP.md
 backend/.vscode
 backend/blog-application.iml
-backend/upload
+backend/upload/
+backend/startup_log.txt
 
 # =========================
 # FRONTEND: React + Vite
@@ -38,7 +39,7 @@ frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/*.local
-frontend/.vite
+frontend/.vite/
 
 # Debug logs (frontend)
 npm-debug.log*
@@ -48,6 +49,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # =========================
-# OS/System Files
+# Uploads & Temp
 # =========================
-Thumbs.db
+upload/
+**/upload/
+images/
+**/images/

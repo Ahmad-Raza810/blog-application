@@ -197,32 +197,7 @@ public class PostServiceImpl implements PostService {
 
         if (Boolean.TRUE.equals(removeCoverImage)) {
             if (existingPost.getCoverImageUrl() != null) {
-                fileService.deleteImage(existingPost.getId()); // Helper assumes deletion based on post ID or logic,
-                                                               // check FileService implementation if ID is enough or if
-                                                               // it needs logic.
-                // existingPost.getCoverImageUrl() is the path? FileService.deleteImage uses
-                // post ID to find post and delete image.
-                // Wait, FileService.deleteImage(UUID postId) fetches post again. This might be
-                // redundant but safe.
-                // Actually, let's look at FileServiceImpl.deleteImage(UUID postId).
-                // It fetches post, gets path, deletes file, sets url to null, saves post.
-                // So calling it here will update the DB record too?
-                // If I am in a transaction here, and that method is also transactional, it
-                // should join.
-                // But wait, if that method saves the post, and I save the post at the end of
-                // this method, is that okay?
-                // Probably yes.
-
-                // However, doing it cleanly:
-                // If I just want to delete the file and update my local 'existingPost' object:
-                // FileService.deleteImage(postId) does: findById, delete file, set null, save.
-                // If I call it, 'existingPost' variable here might become stale regarding that
-                // field?
-                // No, 'existingPost' is a managed entity in this transaction context?
-                // Better to simple call it.
                 fileService.deleteImage(existingPost.getId());
-                // Refresh existingPost or manually set null to keep in sync if needed, though
-                // deleteImage saves it.
                 existingPost.setCoverImageUrl(null);
             }
         } else if (file != null && !file.isEmpty()) {
