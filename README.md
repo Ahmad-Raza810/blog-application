@@ -2,17 +2,17 @@
 
 A robust, full-stack blogging platform built with **Spring Boot** and **React**.
 
-## ✨ Key Features
+## ✨ Key Technical Features
 
-- **🔐 Secure Authentication**: JWT-based authentication with Spring Security.
-- **📝 Content Management**: CRUD operations for posts, categories, and tags.
-- **🏷️ Organization**: Hierarchical categories and flexible tagging.
-- **🎨 Modern UI**: Responsive design using Tailwind CSS.
-- **⚡ Performance**: Powered by Java 21, Spring Boot 3.4, and Vite.
+- **🔐 Advanced Security**: JWT-based authentication with a secure **Refresh Token mechanism**.
+- **⚡ Optimized Pagination**: High-performance **Cursor-based pagination** for efficient data fetching.
+- **🚀 Smart Caching**: Backend performance boost using **Caffeine caching**.
+- **📝 Complex Relationships**: Robust data model with intricate **One-to-Many** and **Many-to-Many** entity relationships.
+- **🎨 Modern Frontend**: Responsive UI using React 18, TypeScript, and Tailwind CSS.
 
 ## 🛠️ Tech Stack
 
-**Backend**: Java 21, Spring Boot 3.4, MySQL, Spring Data JPA, Spring Security + JWT.
+**Backend**: Java 21, Spring Boot 3.4, MySQL, Spring Data JPA, Spring Security, Caffeine.
 **Frontend**: React 18, TypeScript, Tailwind CSS, Vite.
 
 ## 🚀 Getting Started
