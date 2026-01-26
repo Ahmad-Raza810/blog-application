@@ -25,7 +25,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     <input
                         ref={ref}
                         className={twMerge(
-                            'block w-full rounded-lg border-secondary-300 bg-white dark:bg-secondary-900 border focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm py-2 px-3 transition-colors',
+                            'block w-full rounded-lg border-secondary-300 bg-white dark:bg-secondary-900 border focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-secondary-900 dark:text-secondary-100 sm:text-sm py-2 px-3 transition-colors',
                             icon ? 'pl-10' : '',
                             error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : '',
                             'disabled:bg-secondary-50 disabled:text-secondary-500',
@@ -59,7 +59,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
                 <textarea
                     ref={ref}
                     className={twMerge(
-                        'block w-full rounded-lg border-secondary-300 bg-white dark:bg-secondary-900 border focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm py-2 px-3 transition-colors',
+                        'block w-full rounded-lg border-secondary-300 bg-white dark:bg-secondary-900 border focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-secondary-900 dark:text-secondary-100 sm:text-sm py-2 px-3 transition-colors',
                         error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : '',
                         'disabled:bg-secondary-50 disabled:text-secondary-500',
                         className

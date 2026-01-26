@@ -17,6 +17,9 @@ const PostForm: React.FC<PostFormProps> = ({ postId }) => {
   const [categoryId, setCategoryId] = useState('');
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set([]));
   const [coverImage, setCoverImage] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [removeCoverImage, setRemoveCoverImage] = useState(false);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -53,7 +56,7 @@ const PostForm: React.FC<PostFormProps> = ({ postId }) => {
           setContent(post.content);
           setCategoryId(post.category.id);
           setSelectedTagIds(new Set(post.tags.map((t) => t.id)));
-          setCoverImage(post.coverImage || ''); // Assuming API supports coverImage now or ignore if not
+          setCoverImage(post.coverImageUrl || ''); // Assuming API supports coverImage now or ignore if not
           editor?.commands.setContent(post.content);
         }
       } catch (err) {
@@ -64,7 +67,32 @@ const PostForm: React.FC<PostFormProps> = ({ postId }) => {
     };
 
     fetchData();
+
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
   }, [postId, editor]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        setError('File size must be less than 2MB');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        setError('File must be an image');
+        return;
+      }
+
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setRemoveCoverImage(false); // Reset remove flag if new file is selected
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,9 +109,9 @@ const PostForm: React.FC<PostFormProps> = ({ postId }) => {
       };
 
       if (postId) {
-        await apiService.updatePost({ ...postData, id: postId, status: PostStatus.PUBLISHED });
+        await apiService.updatePost({ ...postData, id: postId, status: PostStatus.PUBLISHED }, selectedFile || undefined, removeCoverImage);
       } else {
-        await apiService.createPost({ ...postData, status: PostStatus.PUBLISHED });
+        await apiService.createPost({ ...postData, status: PostStatus.PUBLISHED }, selectedFile || undefined);
       }
       navigate('/');
     } catch (err: any) {
@@ -169,14 +197,62 @@ const PostForm: React.FC<PostFormProps> = ({ postId }) => {
           </Select>
         </div>
 
-        <Input
-          label="Cover Image URL"
-          placeholder="https://example.com/image.jpg"
-          value={coverImage}
-          onValueChange={setCoverImage}
-          startContent={<ImageIcon size={18} className="text-default-400" />}
-          variant="bordered"
-        />
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <input
+              type="file"
+              id="cover-image-upload"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <Button
+              as="label"
+              htmlFor="cover-image-upload"
+              variant="flat"
+              color="primary"
+              startContent={<ImageIcon size={18} />}
+              className="cursor-pointer"
+            >
+              {selectedFile ? 'Change Cover Image' : 'Upload Cover Image'}
+            </Button>
+            {selectedFile && (
+              <span className="text-sm text-default-500">{selectedFile.name}</span>
+            )}
+          </div>
+
+          {(previewUrl || coverImage) && (
+            <div className="relative w-full max-w-2xl aspect-video rounded-xl overflow-hidden border border-divider group">
+              <img
+                src={previewUrl || coverImage}
+                alt="Post cover preview"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Button
+                  isIconOnly
+                  variant="flat"
+                  color="danger"
+                  onPress={() => {
+                    setSelectedFile(null);
+                    setPreviewUrl(null);
+                    setCoverImage('');
+                    setRemoveCoverImage(true);
+                  }}
+                >
+                  <X size={20} />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!previewUrl && !coverImage && (
+            <div className="w-full max-w-2xl aspect-video rounded-xl border-2 border-dashed border-divider flex flex-col items-center justify-center bg-default-50 text-default-400">
+              <ImageIcon size={48} className="mb-2 opacity-50" />
+              <p>No cover image selected</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Editor Toolbar could go here */}

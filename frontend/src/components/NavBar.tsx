@@ -139,7 +139,7 @@ const NavBar = () => {
 
             {user ? (
               <div className="flex items-center gap-3">
-                <Link to="/create-post">
+                <Link to="/posts/new">
                   <Button variant="ghost" size="sm" className="gap-2">
                     <PenTool className="w-4 h-4" />
                     Write
@@ -286,7 +286,7 @@ const NavBar = () => {
                         <p className="text-xs text-secondary-500">{user.email}</p>
                       </div>
                     </div>
-                    <Link to="/create-post" onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/posts/new" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" className="w-full justify-start gap-2">
                         <PenTool className="w-4 h-4" />
                         Start Writing

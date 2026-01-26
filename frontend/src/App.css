@@ -15,25 +15,27 @@
   --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
   --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   --gradient-card: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  
+
   /* Accent Colors */
   --color-accent-1: #667eea;
   --color-accent-2: #764ba2;
   --color-accent-3: #f093fb;
   --color-accent-4: #4facfe;
-  
+
   /* Glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  
+
   /* Animations */
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 /* Base Styles */
-html, body, #root {
+html,
+body,
+#root {
   height: 100vh;
   margin: 0;
   padding: 0;
@@ -44,12 +46,15 @@ html, body, #root {
 #root {
   width: 100%;
   min-height: 100%;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  background-attachment: fixed;
 }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -66,8 +71,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* Glassmorphism Card */
@@ -103,21 +115,32 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--gradient-primary);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   animation: border-rotation 3s linear infinite;
 }
 
 @keyframes border-rotation {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-/* Smooth Transitions */
-* {
+/* Smooth Transitions - Specific to interactive elements */
+button,
+a,
+input,
+select,
+textarea {
   transition: var(--transition-smooth);
 }
 
-button, a {
+button,
+a {
   transition: var(--transition-bounce);
 }
 
@@ -153,7 +176,7 @@ button, a {
 
 /* TipTap Editor Styles */
 .ProseMirror {
-  > * + * {
+  >*+* {
     margin-top: 0.75em;
   }
 
@@ -208,10 +231,13 @@ button, a {
 
 /* Loading Animation */
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.6;
     box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
   }
+
   50% {
     opacity: 1;
     box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
@@ -227,6 +253,7 @@ button, a {
   0% {
     background-position: -1000px 0;
   }
+
   100% {
     background-position: 1000px 0;
   }
@@ -243,14 +270,23 @@ button, a {
   html {
     font-size: 14px;
   }
-  
-  h1 { font-size: 1.75rem; }
-  h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.25rem; }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
 }
 
 /* Reduced Motion Preference */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

@@ -18,6 +18,8 @@ import com.projects.blog_application.service.*;
 import com.projects.blog_application.util.CursorDecoder;
 import com.projects.blog_application.util.CursorEncoder;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -26,6 +28,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -42,9 +46,9 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final static int WORD_PER_MINUTE = 200;
     private final CommentService commentService;
+    private final FileService fileService;
 
-
-    //service method for get all post
+    // service method for get all post
     @Override
     @Transactional
     @Cacheable("posts")
@@ -65,8 +69,7 @@ public class PostServiceImpl implements PostService {
                     .findByPostStatusAndCategoryIdOrderByCreatedAtDesc(
                             PostStatus.PUBLISHED,
                             categoryId,
-                            pageable
-                    );
+                            pageable);
 
         } else {
 
@@ -77,16 +80,14 @@ public class PostServiceImpl implements PostService {
                         .findByPostStatusAndCreatedAtLessThanOrderByCreatedAtDesc(
                                 PostStatus.PUBLISHED,
                                 decodedCursor,
-                                pageable
-                        );
+                                pageable);
             } else {
                 posts = postRepository
                         .findByPostStatusAndCategoryIdAndCreatedAtLessThanOrderByCreatedAtDesc(
                                 PostStatus.PUBLISHED,
                                 categoryId,
                                 decodedCursor,
-                                pageable
-                        );
+                                pageable);
             }
         }
 
@@ -100,8 +101,7 @@ public class PostServiceImpl implements PostService {
             return new PageResponse(
                     Collections.emptyList(),
                     null,
-                    false
-            );
+                    false);
         }
 
         String nextCursor = hasMore
@@ -113,34 +113,33 @@ public class PostServiceImpl implements PostService {
                         .map(postMapper::toDto)
                         .collect(Collectors.toList()),
                 nextCursor,
-                hasMore
-        );
+                hasMore);
     }
 
-
-    //service method for get drafts post only
+    // service method for get drafts post only
     @Override
     public List<Post> getDrafts(UUID userId) {
         User loggedInUser = userService.getUserById(userId);
         return postRepository.findAllByAuthorAndPostStatus(loggedInUser, PostStatus.DRAFT);
     }
 
-
-    //service method for create a post
+    // service method for create a post
     @Override
     @Transactional
-    @Caching(
-            put = @CachePut(value = "posts_ids", key = "#result.id"),
-            evict = @CacheEvict(value = "posts", allEntries = true)
-    )
-    public Post createPost(CreatePostDTO createPostDTO, UUID userId) {
+    @Caching(put = @CachePut(value = "posts_ids", key = "#result.id"), evict = @CacheEvict(value = "posts", allEntries = true))
+    public Post createPost(CreatePostDTO createPostDTO, UUID userId, MultipartFile file) {
 
         User loggedInUser = userService.getUserById(userId);
         List<Tag> tags = new ArrayList<>();
-        if (!createPostDTO.getTagIds().isEmpty()) {
+        if (createPostDTO.getTagIds() != null && !createPostDTO.getTagIds().isEmpty()) {
             tags = tagService.getTagIds(createPostDTO.getTagIds());
         }
         Category category = categoryService.getCategoryById(createPostDTO.getCategoryId());
+
+        String coverImageUrl = null;
+        if (file != null) {
+            coverImageUrl = fileService.saveImage(file);
+        }
 
         Post post = Post.builder()
                 .title(createPostDTO.getTitle())
@@ -150,27 +149,24 @@ public class PostServiceImpl implements PostService {
                 .postStatus(createPostDTO.getStatus())
                 .author(loggedInUser)
                 .readingTime(calculateReadTime(createPostDTO.getContent()))
+                .coverImageUrl(coverImageUrl)
                 .build();
 
         return postRepository.save(post);
     }
 
-
-    //a utility method which calculate read time
+    // a utility method which calculate read time
     private int calculateReadTime(String content) {
         int wordCount = content.trim().split("\\s").length;
         return (int) Math.ceil((double) wordCount / WORD_PER_MINUTE);
     }
 
-
-    //service method for update a post
+    // service method for update a post
     @Override
     @Transactional
-    @Caching(
-            put = @CachePut(value = "posts_ids", key = "#result.id"),
-            evict = @CacheEvict(value = "posts", allEntries = true)
-    )
-    public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO, UUID userId) {
+    @Caching(put = @CachePut(value = "posts_ids", key = "#result.id"), evict = @CacheEvict(value = "posts", allEntries = true))
+    public Post updatePost(UUID id, PostUpdateDTO postUpdateDTO, UUID userId, MultipartFile file,
+            Boolean removeCoverImage) {
 
         Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post does not exist with id " + id));
@@ -194,15 +190,29 @@ public class PostServiceImpl implements PostService {
 
         Set<UUID> existingTagIds = existingPost.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
         Set<UUID> updatePostRequestTagIds = postUpdateDTO.getTagIds();
-        if (!existingTagIds.equals(updatePostRequestTagIds)) {
+        if (updatePostRequestTagIds != null && !existingTagIds.equals(updatePostRequestTagIds)) {
             List<Tag> newTags = tagService.getTagIds(updatePostRequestTagIds);
             existingPost.setTags(new HashSet<>(newTags));
+        }
+
+        if (Boolean.TRUE.equals(removeCoverImage)) {
+            if (existingPost.getCoverImageUrl() != null) {
+                fileService.deleteImage(existingPost.getId());
+                existingPost.setCoverImageUrl(null);
+            }
+        } else if (file != null && !file.isEmpty()) {
+            // If a new file is uploaded
+            if (existingPost.getCoverImageUrl() != null) {
+                fileService.deleteImage(existingPost.getId());
+            }
+            String coverImageUrl = fileService.saveImage(file);
+            existingPost.setCoverImageUrl(coverImageUrl);
         }
 
         return postRepository.save(existingPost);
     }
 
-    //service method for get post by id
+    // service method for get post by id
     @Cacheable("posts_ids")
     @Override
     public Post getPost(UUID id) {
@@ -210,14 +220,11 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post does not exist with ID " + id));
     }
 
-
-    //service method for delete a post
-    @Caching(
-            evict = {
-                    @CacheEvict(value = "posts", allEntries = true),
-                    @CacheEvict(value = "posts_ids", key = "#postId")
-            }
-    )
+    // service method for delete a post
+    @Caching(evict = {
+            @CacheEvict(value = "posts", allEntries = true),
+            @CacheEvict(value = "posts_ids", key = "#postId")
+    })
     @Override
     public void deletePost(UUID postId, UUID userId) {
         Post post = getPost(postId);
@@ -231,30 +238,28 @@ public class PostServiceImpl implements PostService {
         postRepository.delete(post);
     }
 
-
-    //service method for get all post of a user
+    // service method for get all post of a user
     @Override
     public List<Post> getAllPostByUserId(UUID userid) {
         User author = userService.getUserById(userid);
         return postRepository.findAllByAuthor(author);
     }
 
-    //service method for return featured post
+    // service method for return featured post
     @Cacheable("featured_post")
     @Override
     public List<Post> getFeaturedPost() {
         return postRepository.findTop5ByIsFeaturedTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
     }
 
-
-    //service method which  return trending posts
+    // service method which return trending posts
     @Cacheable("trending_post")
     @Override
     public List<Post> getTrendingPosts() {
-        List<Post> trendingPosts = postRepository.findTByIsTrendingTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
+        List<Post> trendingPosts = postRepository
+                .findTByIsTrendingTrueAndPostStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED);
         Collections.shuffle(trendingPosts);
         return trendingPosts.stream().limit(5).toList();
     }
-
 
 }

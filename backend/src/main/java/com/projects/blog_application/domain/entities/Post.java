@@ -69,6 +69,8 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    private String coverImageUrl;
+
 
     @PrePersist
     protected void onCreate(){

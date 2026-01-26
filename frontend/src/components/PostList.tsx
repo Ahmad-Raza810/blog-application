@@ -81,7 +81,7 @@ const PostList: React.FC<PostListProps> = ({
                 {/* Image Section */}
                 <div className="md:w-2/5 h-48 md:h-full relative overflow-hidden">
                   <img
-                    src={post.coverImage || `https://source.unsplash.com/random/800x600?${post.category?.name || 'tech'}`}
+                    src={post.coverImageUrl || `https://source.unsplash.com/random/800x600?${post.category?.name || 'tech'}`}
                     alt={post.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />

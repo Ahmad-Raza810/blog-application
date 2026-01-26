@@ -61,7 +61,7 @@ export interface Post {
   id: string;
   title: string;
   content: string;
-  coverImage?: string;
+  coverImageUrl?: string;
   author?: {
     id: string;
     name: string;
@@ -357,14 +357,48 @@ class ApiService {
     return response.data.data; // ✅ inner data
   }
 
-  public async createPost(post: CreatePostRequest): Promise<Post> {
-    const response: AxiosResponse<Post> = await this.api.post('/posts', post);
-    return response.data;
+  public async createPost(post: CreatePostRequest, file?: File): Promise<Post> {
+    const formData = new FormData();
+
+    // Create a blob for the post data to satisfy @RequestPart
+    const postBlob = new Blob([JSON.stringify(post)], { type: 'application/json' });
+    formData.append('post', postBlob);
+
+    if (file) {
+      formData.append('file', file);
+    }
+
+    const response: AxiosResponse<{ message: string; data: Post; status: number; success: boolean; dateTime: string }> = await this.api.post('/posts', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data.data;
   }
 
-  public async updatePost(post: UpdatePostRequest): Promise<Post> {
-    const response: AxiosResponse<{ message: string; data: Post; status: number; success: boolean; dateTime: string }> = await this.api.put('/posts', post);
-    return response.data.data; // Extract post from ApiResponse wrapper
+  public async updatePost(post: UpdatePostRequest, file?: File, removeCoverImage?: boolean): Promise<Post> {
+    const formData = new FormData();
+
+    // Create a blob for the post data to satisfy @RequestPart
+    const postBlob = new Blob([JSON.stringify(post)], { type: 'application/json' });
+    formData.append('post', postBlob);
+
+    if (file) {
+      formData.append('file', file);
+    }
+
+    if (removeCoverImage) {
+      formData.append('removeCoverImage', String(removeCoverImage));
+    }
+
+
+    const response: AxiosResponse<{ message: string; data: Post; status: number; success: boolean; dateTime: string }> =
+      await this.api.put('/posts', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+    return response.data.data;
   }
 
   public async deletePost(id: string): Promise<void> {

@@ -54,6 +54,7 @@ public class ProdConfig {
                 .requestMatchers(HttpMethod.POST,"/api/v1/auth/refresh-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/user").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/comments").permitAll()
+                .requestMatchers("/images/**").permitAll()
 
                 .anyRequest().authenticated()
         );
