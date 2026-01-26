@@ -93,14 +93,6 @@ const HomePage: React.FC = () => {
                 Start Reading
               </Button>
             </Link>
-            {user && (
-              <Link to="/posts/new">
-                <Button size="lg" variant="bordered" className="border-2 border-white/40 text-white hover:bg-white/10 font-bold px-8 w-full sm:w-auto">
-                  <PenTool className="w-5 h-5 mr-2" />
-                  Write a Blog
-                </Button>
-              </Link>
-            )}
           </div>
         </div>
 
