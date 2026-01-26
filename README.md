@@ -32,10 +32,5 @@ A robust, full-stack blogging platform built with **Spring Boot** and **React**.
 ## Entity Relationships
 <img width="900" height="800" alt="Entity_Relatioships" src="https://github.com/user-attachments/assets/f4d28a7e-1581-416e-804e-fb2beed9744d" />
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
 Made with ❤️ by [Ahmad Raza]
 
