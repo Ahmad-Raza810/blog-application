@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Heart } from 'lucide-react';
+import { Instagram, Linkedin, Mail, Heart, Github } from 'lucide-react';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
@@ -22,16 +22,13 @@ const Footer = () => {
                             Discover stories, thinking, and expertise from writers on any topic. A place where ideas find their home.
                         </p>
                         <div className="flex gap-4">
-                            <a href="#" className="text-secondary-400 hover:text-primary-500 transition-colors">
-                                <Twitter className="w-5 h-5" />
-                            </a>
-                            <a href="#" className="text-secondary-400 hover:text-primary-500 transition-colors">
-                                <Facebook className="w-5 h-5" />
-                            </a>
-                            <a href="#" className="text-secondary-400 hover:text-primary-500 transition-colors">
+                            <a href="https://www.instagram.com/ahhmad____77" target="_blank" rel="noopener noreferrer" className="text-secondary-400 hover:text-primary-500 transition-colors">
                                 <Instagram className="w-5 h-5" />
                             </a>
-                            <a href="#" className="text-secondary-400 hover:text-primary-500 transition-colors">
+                            <a href="https://github.com/Ahmad-Raza810/blog-application" target="_blank" rel="noopener noreferrer" className="text-secondary-400 hover:text-primary-500 transition-colors">
+                                <Github className="w-5 h-5" />
+                            </a>
+                            <a href="https://www.linkedin.com/in/ahmad-raza-09062a323/" target="_blank" rel="noopener noreferrer" className="text-secondary-400 hover:text-primary-500 transition-colors">
                                 <Linkedin className="w-5 h-5" />
                             </a>
                         </div>
@@ -61,11 +58,7 @@ const Footer = () => {
                                     Tags
                                 </Link>
                             </li>
-                            <li>
-                                <Link to="/authors" className="text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
-                                    Top Authors
-                                </Link>
-                            </li>
+
                         </ul>
                     </div>
 
@@ -121,7 +114,7 @@ const Footer = () => {
                         © {currentYear} ContentHub. All rights reserved.
                     </p>
                     <p className="text-sm text-secondary-500 dark:text-secondary-400 flex items-center gap-1">
-                        Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by DevTiro
+                        Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by Ahmad Raza
                     </p>
                 </div>
             </div>
